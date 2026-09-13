@@ -26,6 +26,7 @@ import Avatar from '../components/Avatar'
 import { useConfirm } from '../components/ConfirmDialog'
 import ContextMenu from '../components/ContextMenu'
 import TagInput from '../components/TagInput'
+import AutoGrowTextarea from '../components/AutoGrowTextarea'
 import {
   ArrowLeft,
   ArrowLeftRight,
@@ -1526,10 +1527,10 @@ export default function ChatPage(): JSX.Element {
                         placeholder="Persona name"
                         style={{ fontSize: 12 }}
                       />
-                      <textarea
+                      <AutoGrowTextarea
                         rows={2}
                         value={newPersonaDescription}
-                        onChange={(e) => setNewPersonaDescription(e.target.value)}
+                        onChange={setNewPersonaDescription}
                         placeholder="A few words about them (optional)"
                         style={{ fontSize: 12 }}
                       />
@@ -1761,9 +1762,9 @@ export default function ChatPage(): JSX.Element {
                       ? "What this Skit is about — a scene, a setup, a mood. Sent to the AI as steering for the whole unattended run."
                       : 'Out-of-character instructions for how this act should play out. Sent to the AI alongside the character and scenario.'}
                   </p>
-                  <textarea
+                  <AutoGrowTextarea
                     value={directorsNotesDraft}
-                    onChange={(e) => setDirectorsNotesDraft(e.target.value)}
+                    onChange={setDirectorsNotesDraft}
                     onBlur={() => updateDirectorsNotes(directorsNotesDraft)}
                     placeholder={
                       activeChat.isSkit
@@ -1771,7 +1772,7 @@ export default function ChatPage(): JSX.Element {
                         : 'e.g. Keep the tone lighthearted. Introduce a plot twist involving the missing letter soon.'
                     }
                     rows={4}
-                    style={{ width: '100%', resize: 'vertical' }}
+                    style={{ width: '100%' }}
                   />
                 </details>
                 </>

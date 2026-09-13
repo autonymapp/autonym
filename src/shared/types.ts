@@ -49,6 +49,9 @@ export interface Lorebook {
   /** True for an existing franchise/canon setting (a game, show, book, etc.) rather than
    *  something original — tells the AI to stick to stated facts instead of inventing lore. */
   isCanonSetting: boolean
+  /** Which Universe this lorebook belongs to, if any — lets Cast's "Linked Lorebooks" list
+   *  filter down to what's relevant instead of showing every lorebook to every character. */
+  universeId: number | null
   createdAt: string
   /** Set when soft-deleted (sits in Trash); null means active. */
   deletedAt: string | null

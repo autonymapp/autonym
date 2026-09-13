@@ -18,7 +18,8 @@ export function buildStarterPackFile(lorebook: Lorebook, entries: LoreEntry[]): 
     lorebook: {
       name: lorebook.name,
       description: lorebook.description,
-      isCanonSetting: lorebook.isCanonSetting
+      isCanonSetting: lorebook.isCanonSetting,
+      universeId: null
     },
     entries: entries.map((e) => ({
       title: e.title,
@@ -46,7 +47,10 @@ export function parseStarterPackFile(raw: any): {
         ? raw.lorebook.name.trim()
         : 'Imported Starter Pack',
     description: typeof raw.lorebook.description === 'string' ? raw.lorebook.description : '',
-    isCanonSetting: !!raw.lorebook.isCanonSetting
+    isCanonSetting: !!raw.lorebook.isCanonSetting,
+    // A pack is portable/shareable — a universeId from wherever it was exported wouldn't
+    // correspond to anything real in this install, so it's never carried over.
+    universeId: null
   }
 
   const entries = raw.entries.map((e: any, i: number) => ({
@@ -84,7 +88,8 @@ export const STARTER_PACKS: StarterPack[] = [
     lorebook: {
       name: 'Final Fantasy XIV',
       description: 'Core playable races and major regions of Eorzea (FFXIV).',
-      isCanonSetting: true
+      isCanonSetting: true,
+      universeId: null
     },
     entries: [
       {

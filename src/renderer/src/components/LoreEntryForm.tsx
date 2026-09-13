@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { LoreEntry, LoreEntryInput, LoreEntryType } from '@shared/types'
 import { COMMON_MISTAKES_FIELD_KEY, LORE_ENTRY_TYPES } from '@shared/loreEntryTypes'
 import LoreTextImporter from './LoreTextImporter'
+import AutoGrowTextarea from './AutoGrowTextarea'
 
 const TYPE_ORDER: LoreEntryType[] = [
   'location',
@@ -105,17 +106,17 @@ export default function LoreEntryForm({
         <label className="field">
           <span className="label">Summary</span>
           <span className="hint">A short general description — always shown regardless of type.</span>
-          <textarea rows={2} value={description} onChange={(e) => setDescription(e.target.value)} />
+          <AutoGrowTextarea rows={2} value={description} onChange={setDescription} />
         </label>
 
         {spec.fields.map((field) => (
           <label key={field.key} className="field">
             <span className="label">{field.label}</span>
             {field.hint && <span className="hint">{field.hint}</span>}
-            <textarea
+            <AutoGrowTextarea
               rows={2}
               value={fields[field.key] ?? ''}
-              onChange={(e) => setField(field.key, e.target.value)}
+              onChange={(value) => setField(field.key, value)}
             />
           </label>
         ))}
@@ -128,10 +129,10 @@ export default function LoreEntryForm({
             entry). Be precise here — a vague or oversimplified correction can introduce a new wrong
             assumption just as easily as no correction at all.
           </span>
-          <textarea
+          <AutoGrowTextarea
             rows={2}
             value={fields[COMMON_MISTAKES_FIELD_KEY] ?? ''}
-            onChange={(e) => setField(COMMON_MISTAKES_FIELD_KEY, e.target.value)}
+            onChange={(value) => setField(COMMON_MISTAKES_FIELD_KEY, value)}
           />
         </label>
 

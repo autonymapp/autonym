@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
-import type { LoreEntry, LoreEntryInput, Lorebook, LorebookInput } from '@shared/types'
+import type { LoreEntry, LoreEntryInput, Lorebook, LorebookInput, Universe } from '@shared/types'
 import { LORE_ENTRY_TYPES } from '@shared/loreEntryTypes'
 import { STARTER_PACKS } from '@shared/starterPacks'
 import LoreEntryForm from '../components/LoreEntryForm'
+import AutoGrowTextarea from '../components/AutoGrowTextarea'
 import AutonymMark from '../components/AutonymMark'
 import { useConfirm } from '../components/ConfirmDialog'
 import ContextMenu from '../components/ContextMenu'
@@ -43,6 +44,8 @@ export default function LorebooksPage(): JSX.Element {
   const [editingLorebookMeta, setEditingLorebookMeta] = useState(false)
   const [metaDescription, setMetaDescription] = useState('')
   const [metaCanon, setMetaCanon] = useState(false)
+  const [metaUniverseId, setMetaUniverseId] = useState<number | null>(null)
+  const [universes, setUniverses] = useState<Universe[]>([])
   const [showStarterPacks, setShowStarterPacks] = useState(false)
   const [importingPackId, setImportingPackId] = useState<string | null>(null)
   const [importingPackFile, setImportingPackFile] = useState(false)
@@ -78,6 +81,7 @@ export default function LorebooksPage(): JSX.Element {
 
   useEffect(() => {
     refreshLorebooks()
+    window.api.universes.list().then(setUniverses).catch((err) => setLoadError(friendlyError(err)))
   }, [])
 
   useEffect(() => {
@@ -121,12 +125,18 @@ export default function LorebooksPage(): JSX.Element {
       refreshEntries(selected.id)
       setMetaDescription(selected.description)
       setMetaCanon(selected.isCanonSetting)
+      setMetaUniverseId(selected.universeId)
       setEditingLorebookMeta(false)
     }
   }, [selected])
 
   async function createLorebook(): Promise<void> {
-    const input: LorebookInput = { name: newLorebookName, description: '', isCanonSetting: newLorebookCanon }
+    const input: LorebookInput = {
+      name: newLorebookName,
+      description: '',
+      isCanonSetting: newLorebookCanon,
+      universeId: null
+    }
     const lb = await window.api.lorebooks.create(input)
     setNewLorebookName('')
     setNewLorebookCanon(false)
@@ -140,7 +150,8 @@ export default function LorebooksPage(): JSX.Element {
     const updated = await window.api.lorebooks.update(selected.id, {
       name: selected.name,
       description: metaDescription,
-      isCanonSetting: metaCanon
+      isCanonSetting: metaCanon,
+      universeId: metaUniverseId
     })
     setSelected(updated)
     setEditingLorebookMeta(false)
@@ -476,6 +487,11 @@ export default function LorebooksPage(): JSX.Element {
                     🌐 Canon Setting
                   </span>
                 )}
+                {selected.universeId && (
+                  <span className="pill" title="Only shows as a linking option within this Universe">
+                    {universes.find((u) => u.id === selected.universeId)?.name ?? 'Universe'}
+                  </span>
+                )}
               </h2>
               <div style={{ display: 'flex', gap: 6 }}>
                 <button
@@ -512,10 +528,10 @@ export default function LorebooksPage(): JSX.Element {
               <div className="panel" style={{ padding: 16, marginTop: 14, maxWidth: 560 }}>
                 <label className="field">
                   <span className="label">Description</span>
-                  <textarea
+                  <AutoGrowTextarea
                     rows={2}
                     value={metaDescription}
-                    onChange={(e) => setMetaDescription(e.target.value)}
+                    onChange={setMetaDescription}
                     placeholder="What this lorebook covers"
                   />
                 </label>
@@ -535,6 +551,24 @@ export default function LorebooksPage(): JSX.Element {
                       : "For a setting you're creating yourself — no extra accuracy instruction is added."}
                   </p>
                 </div>
+                <label className="field" style={{ marginTop: 12 }}>
+                  <span className="label">Universe (Optional)</span>
+                  <span className="hint">
+                    Scopes this lorebook to one world, so it only shows as a linking option for
+                    characters in the same Universe. Leave unassigned to keep it available to everyone.
+                  </span>
+                  <select
+                    value={metaUniverseId ?? ''}
+                    onChange={(e) => setMetaUniverseId(e.target.value ? Number(e.target.value) : null)}
+                  >
+                    <option value="">No Universe</option>
+                    {universes.map((u) => (
+                      <option key={u.id} value={u.id}>
+                        {u.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
                 <button className="btn btn-primary btn-sm" onClick={saveLorebookMeta} style={{ marginTop: 12 }}>
                   Save
                 </button>

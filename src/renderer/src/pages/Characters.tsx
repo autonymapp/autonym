@@ -6,7 +6,7 @@ import Avatar from '../components/Avatar'
 import RelationshipPanel from '../components/RelationshipPanel'
 import { useConfirm } from '../components/ConfirmDialog'
 import ContextMenu from '../components/ContextMenu'
-import { ArrowLeft, Download, MessageCircle, Pencil, Trash2, RotateCcw } from 'lucide-react'
+import { ArrowLeft, ChevronRight, Download, MessageCircle, Pencil, Trash2, RotateCcw } from 'lucide-react'
 import { friendlyError } from '../friendlyError'
 import { useAppStore } from '../store/appStore'
 import { formatCharacterAsSheet } from '@shared/exportCharacter'
@@ -25,6 +25,7 @@ export default function CharactersPage(): JSX.Element {
   const [draftedFromChat, setDraftedFromChat] = useState(false)
   const [cardContextMenu, setCardContextMenu] = useState<{ characterId: number; x: number; y: number } | null>(null)
   const [journalContextMenu, setJournalContextMenu] = useState<{ entryId: number; x: number; y: number } | null>(null)
+  const [showAllLorebookUniverses, setShowAllLorebookUniverses] = useState(false)
   const [tagFilter, setTagFilter] = useState<string | null>(null)
   const [universeFilter, setUniverseFilter] = useState<number | 'none' | null>(null)
   const [showTrash, setShowTrash] = useState(false)
@@ -115,6 +116,7 @@ export default function CharactersPage(): JSX.Element {
       setLinkedLorebookIds([])
       setJournalEntries([])
     }
+    setShowAllLorebookUniverses(false)
   }, [editing])
 
   async function deleteJournalEntry(id: number): Promise<void> {
@@ -248,48 +250,79 @@ export default function CharactersPage(): JSX.Element {
           onSave={handleSave}
           onCancel={() => setEditing(null)}
         />
+        {editing !== 'new' && (() => {
+          const crossUniverseLorebookCount = lorebooks.filter(
+            (lb) => lb.universeId !== editing.universeId && !linkedLorebookIds.includes(lb.id)
+          ).length
+          const visibleLorebooks = showAllLorebookUniverses
+            ? lorebooks
+            : lorebooks.filter((lb) => lb.universeId === editing.universeId || linkedLorebookIds.includes(lb.id))
+          return (
+            <div className="panel" style={{ marginTop: 24, maxWidth: 840, padding: 16 }}>
+              <h3 style={{ marginBottom: 4 }}>Linked Lorebooks</h3>
+              <p className="hint" style={{ marginBottom: 10 }}>
+                World-info entries from these lorebooks can be auto-injected into this character's acts.
+              </p>
+              {lorebooks.length === 0 && (
+                <p className="hint">No lorebooks yet — create one on the Lorebooks page.</p>
+              )}
+              {crossUniverseLorebookCount > 0 && (
+                <label style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10, fontSize: 12.5 }}>
+                  <input
+                    type="checkbox"
+                    checked={showAllLorebookUniverses}
+                    onChange={(e) => setShowAllLorebookUniverses(e.target.checked)}
+                  />
+                  <span className="hint">
+                    Show {crossUniverseLorebookCount} lorebook{crossUniverseLorebookCount === 1 ? '' : 's'} from
+                    other universes
+                  </span>
+                </label>
+              )}
+              {lorebooks.length > 0 && visibleLorebooks.length === 0 && (
+                <p className="hint">No lorebooks in this Universe yet.</p>
+              )}
+              {visibleLorebooks.map((lb) => (
+                <label key={lb.id} style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
+                  <input
+                    type="checkbox"
+                    checked={linkedLorebookIds.includes(lb.id)}
+                    onChange={() => toggleLorebook(lb.id)}
+                  />
+                  <span style={{ fontSize: 13 }}>{lb.name}</span>
+                </label>
+              ))}
+            </div>
+          )
+        })()}
         {editing !== 'new' && (
           <div className="panel" style={{ marginTop: 24, maxWidth: 840, padding: 16 }}>
-            <h3 style={{ marginBottom: 4 }}>Linked Lorebooks</h3>
-            <p className="hint" style={{ marginBottom: 10 }}>
-              World-info entries from these lorebooks can be auto-injected into this character's acts.
-            </p>
-            {lorebooks.length === 0 && (
-              <p className="hint">No lorebooks yet — create one on the Lorebooks page.</p>
-            )}
-            {lorebooks.map((lb) => (
-              <label key={lb.id} style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
-                <input
-                  type="checkbox"
-                  checked={linkedLorebookIds.includes(lb.id)}
-                  onChange={() => toggleLorebook(lb.id)}
-                />
-                <span style={{ fontSize: 13 }}>{lb.name}</span>
-              </label>
-            ))}
+            <details open>
+              <summary className="section-title" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <ChevronRight size={14} className="details-chevron" /> 🔗 Relationship Map
+              </summary>
+              <p className="hint" style={{ marginTop: 4, marginBottom: 4 }}>
+                How {editing.name} relates to your other characters. Whenever they're both in the same
+                act (one played by you, one by the AI), this gets folded into the prompt automatically.
+              </p>
+              <RelationshipPanel
+                character={editing}
+                otherCharacters={characters.filter((c) => c.id !== editing.id)}
+              />
+            </details>
           </div>
         )}
         {editing !== 'new' && (
           <div className="panel" style={{ marginTop: 24, maxWidth: 840, padding: 16 }}>
-            <h3 style={{ marginBottom: 4 }}>🔗 Relationship Map</h3>
-            <p className="hint" style={{ marginBottom: 4 }}>
-              How {editing.name} relates to your other characters. Whenever they're both in the same
-              act (one played by you, one by the AI), this gets folded into the prompt automatically.
-            </p>
-            <RelationshipPanel
-              character={editing}
-              otherCharacters={characters.filter((c) => c.id !== editing.id)}
-            />
-          </div>
-        )}
-        {editing !== 'new' && (
-          <div className="panel" style={{ marginTop: 24, maxWidth: 840, padding: 16 }}>
-            <h3 style={{ marginBottom: 4 }}>📔 Journal</h3>
-            <p className="hint" style={{ marginBottom: 10 }}>
-              A running log of what's happened to {editing.name} across every act they've appeared
-              in. Generate an entry for an act from that act's top bar.
-            </p>
-            {journalEntries.length === 0 ? (
+            <details open>
+              <summary className="section-title" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <ChevronRight size={14} className="details-chevron" /> 📔 Journal
+              </summary>
+              <p className="hint" style={{ marginTop: 4, marginBottom: 10 }}>
+                A running log of what's happened to {editing.name} across every act they've appeared
+                in. Generate an entry for an act from that act's top bar.
+              </p>
+              {journalEntries.length === 0 ? (
               <p className="hint">No journal entries yet.</p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -324,6 +357,7 @@ export default function CharactersPage(): JSX.Element {
                   ))}
               </div>
             )}
+            </details>
           </div>
         )}
         {journalContextMenu && (

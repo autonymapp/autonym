@@ -177,6 +177,7 @@ export function initDb(): void {
     store.lorebooks = store.lorebooks.map((lb) => ({
       ...lb,
       isCanonSetting: (lb as any).isCanonSetting ?? false,
+      universeId: (lb as any).universeId ?? null,
       deletedAt: (lb as any).deletedAt ?? null
     }))
     store.loreEntries = store.loreEntries.map((e) => {

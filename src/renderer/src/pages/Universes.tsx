@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { Character, Universe, UniverseInput } from '@shared/types'
 import Avatar from '../components/Avatar'
+import AutoGrowTextarea from '../components/AutoGrowTextarea'
 import { useConfirm } from '../components/ConfirmDialog'
 import { friendlyError } from '../friendlyError'
 import { useAppStore } from '../store/appStore'
@@ -316,10 +317,10 @@ export default function UniversesPage(): JSX.Element {
 
             <label className="field" style={{ maxWidth: 560 }}>
               <span className="label">Description</span>
-              <textarea
+              <AutoGrowTextarea
                 rows={3}
                 value={descriptionDraft}
-                onChange={(e) => setDescriptionDraft(e.target.value)}
+                onChange={setDescriptionDraft}
                 onBlur={saveDescription}
                 placeholder="What this world is — tone, setting, the shape of it"
               />

@@ -583,6 +583,18 @@ textarea {
   color: var(--text-faint);
   margin: 4px 0 2px;
 }
+/* details/summary headers set display:flex to lay out an icon + title, which suppresses the
+   browser's native disclosure triangle — this restores a visible, rotating collapse indicator. */
+summary::-webkit-details-marker {
+  display: none;
+}
+.details-chevron {
+  transition: transform 150ms ease;
+  flex-shrink: 0;
+}
+details[open] > summary .details-chevron {
+  transform: rotate(90deg);
+}
 .empty-state {
   color: var(--text-dim);
   font-size: 13px;

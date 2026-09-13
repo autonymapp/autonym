@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
-import { BookOpen, Copy, FileText, Info, Maximize2, Minimize2, Save, Wand2 } from 'lucide-react'
+import { BookOpen, Copy, FileText, Info, Save, Wand2 } from 'lucide-react'
 import type { Chat, ChatMessage, Character, LoreEntry, OpenRouterModel } from '@shared/types'
 import { formatChatAsStory } from '@shared/exportStory'
 import { estimateCost, formatCost } from '@shared/costEstimate'
 import { friendlyError } from '../friendlyError'
 import { useConfirm } from './ConfirmDialog'
 import MessageBubble from './MessageBubble'
+import AutoGrowTextarea from './AutoGrowTextarea'
 
 const FORMAT_BUTTONS: { label: string; prefix: string; suffix: string; title: string }[] = [
   { label: '💬 Dialogue', prefix: '"', suffix: '"', title: 'Wrap as spoken dialogue: "like this"' },
@@ -43,7 +44,6 @@ export default function ChatWindow({
   const [busyAction, setBusyAction] = useState<'regenerate' | 'continue' | null>(null)
   const [models, setModels] = useState<OpenRouterModel[]>([])
   const [loreEntries, setLoreEntries] = useState<LoreEntry[]>([])
-  const [expanded, setExpanded] = useState(false)
   const [synonymTarget, setSynonymTarget] = useState<{ start: number; end: number; word: string } | null>(null)
   const [synonymOptions, setSynonymOptions] = useState<string[] | null>(null)
   const [lookingUpSynonyms, setLookingUpSynonyms] = useState(false)
@@ -485,13 +485,6 @@ export default function ChatWindow({
             </>
           )}
           <button
-            className="msg-action-btn"
-            title={expanded ? 'Collapse the composer' : 'Expand the composer to see more while writing'}
-            onClick={() => setExpanded((e) => !e)}
-          >
-            {expanded ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
-          </button>
-          <button
             className="btn btn-sm"
             title="Have the AI draft your next line — review and edit before sending"
             onClick={suggestReply}
@@ -519,11 +512,11 @@ export default function ChatWindow({
           </div>
         )}
         <div style={{ display: 'flex', gap: 8 }}>
-          <textarea
+          <AutoGrowTextarea
             ref={textareaRef}
-            rows={expanded ? 10 : 2}
+            rows={2}
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={setInput}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault()

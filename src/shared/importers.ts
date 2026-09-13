@@ -117,7 +117,8 @@ function parseCharacterBook(book: any): ParsedLorebook | undefined {
     lorebook: {
       name: firstNonEmptyString(book.name, 'Imported Lorebook'),
       description: firstNonEmptyString(book.description),
-      isCanonSetting: false
+      isCanonSetting: false,
+      universeId: null
     },
     entries
   }
@@ -242,7 +243,8 @@ export function parseLorebookImport(raw: any): ParsedLorebook {
     lorebook: {
       name: firstNonEmptyString(raw.name, 'Imported Lorebook'),
       description: firstNonEmptyString(raw.description),
-      isCanonSetting: !!raw.isCanonSetting
+      isCanonSetting: !!raw.isCanonSetting,
+      universeId: null
     },
     entries
   }

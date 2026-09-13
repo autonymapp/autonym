@@ -17,6 +17,7 @@ import type { Character, ChatMessage, LoreEntry } from '@shared/types'
 import Avatar from './Avatar'
 import ContextMenu, { type ContextMenuItem } from './ContextMenu'
 import FormattedMessage from './FormattedMessage'
+import AutoGrowTextarea from './AutoGrowTextarea'
 
 export default function MessageBubble({
   message,
@@ -162,11 +163,11 @@ export default function MessageBubble({
           )}
           {editing ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <textarea
+              <AutoGrowTextarea
                 autoFocus
                 value={draft}
-                onChange={(e) => setDraft(e.target.value)}
-                rows={Math.max(2, Math.ceil(draft.length / 60))}
+                onChange={setDraft}
+                rows={2}
                 style={{ minWidth: 240, color: 'var(--text)' }}
               />
               <div style={{ display: 'flex', gap: 6 }}>

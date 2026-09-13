@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { LoreEntryType } from '@shared/types'
 import { friendlyError } from '../friendlyError'
+import AutoGrowTextarea from './AutoGrowTextarea'
 
 type Source = 'text' | 'url'
 
@@ -107,10 +108,10 @@ export default function LoreTextImporter({
       {(source === 'text' || rawText) && (
         <label className="field">
           <span className="label">{source === 'url' ? 'Fetched Text (Editable) — couldn\'t auto-organize, fix it up and retry below' : 'Reference Text'}</span>
-          <textarea
+          <AutoGrowTextarea
             rows={6}
             value={rawText}
-            onChange={(e) => setRawText(e.target.value)}
+            onChange={setRawText}
             placeholder="Paste text here..."
           />
         </label>

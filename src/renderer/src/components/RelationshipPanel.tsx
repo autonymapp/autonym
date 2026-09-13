@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { Character, CharacterRelationship } from '@shared/types'
 import { useConfirm } from './ConfirmDialog'
+import AutoGrowTextarea from './AutoGrowTextarea'
 import { friendlyError } from '../friendlyError'
 
 function RelationshipRow({
@@ -68,9 +69,9 @@ function RelationshipRow({
           style={{ flex: 1 }}
         />
       </div>
-      <textarea
+      <AutoGrowTextarea
         value={description}
-        onChange={(e) => setDescription(e.target.value)}
+        onChange={setDescription}
         placeholder={`How ${character.name} and ${otherCharacter.name} know each other and feel about one another`}
         rows={2}
         style={{ width: '100%' }}

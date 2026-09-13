@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { Scenario, ScenarioInput } from '@shared/types'
 import MilestoneEditor from '../components/MilestoneEditor'
+import AutoGrowTextarea from '../components/AutoGrowTextarea'
 import { useConfirm } from '../components/ConfirmDialog'
 import ContextMenu from '../components/ContextMenu'
 import { ArrowLeft, Pencil, Trash2 } from 'lucide-react'
@@ -85,10 +86,10 @@ export default function ScenarioMakerPage(): JSX.Element {
             <label className="field">
               <span className="label">Scene</span>
               <span className="hint">Set the stage — where things start and what's true at the outset.</span>
-              <textarea
+              <AutoGrowTextarea
                 rows={4}
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                onChange={setDescription}
                 placeholder="e.g. My character meets yours for the first time at a crowded market square."
               />
             </label>
