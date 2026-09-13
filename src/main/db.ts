@@ -774,11 +774,12 @@ export const messageRepo = {
   },
   /** Updates the currently-displayed text — also patches the active variant so a later
    *  swipe-away-and-back doesn't lose the edit. */
-  setSpeaker(id: number, speakerCharacterId: number | null): void {
+  setSpeaker(id: number, speakerCharacterId: number | null): ChatMessage {
     const idx = store.messages.findIndex((m) => m.id === id)
-    if (idx === -1) return
+    if (idx === -1) throw new Error('Message not found')
     store.messages[idx] = { ...store.messages[idx], speakerCharacterId }
     persist()
+    return store.messages[idx]
   },
   setMatchedLoreEntries(id: number, matchedLoreEntryIds: number[]): void {
     const idx = store.messages.findIndex((m) => m.id === id)

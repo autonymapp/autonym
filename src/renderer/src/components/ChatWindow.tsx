@@ -311,6 +311,11 @@ export default function ChatWindow({
     replaceMessage(updated)
   }
 
+  async function setSpeaker(messageId: number, speakerCharacterId: number | null): Promise<void> {
+    const updated = await window.api.messages.setSpeaker(messageId, speakerCharacterId)
+    replaceMessage(updated)
+  }
+
   async function send(): Promise<void> {
     const content = input.trim()
     if (!content || sending) return
@@ -413,12 +418,14 @@ export default function ChatWindow({
               isStreaming={m.id === streamingMessageId}
               showSwipeControls={!isUser && i === lastAssistantIndex && m.id > 0}
               busyAction={busyMessageId === m.id ? busyAction : null}
+              groupCast={!isUser && groupCharacters.length > 0 ? [character, ...groupCharacters] : []}
               onSetActiveVariant={(index) => setActiveVariant(m.id, index)}
               onRegenerate={() => regenerate(m.id)}
               onContinue={() => continueMessage(m.id)}
               onEdit={(content) => editMessage(m.id, content)}
               onDelete={() => deleteMessage(m.id)}
               onToggleBookmark={() => toggleBookmark(m.id)}
+              onSetSpeaker={(characterId) => setSpeaker(m.id, characterId)}
               onFork={() => onForkFromMessage(m.id)}
             />
           )

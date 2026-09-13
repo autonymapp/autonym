@@ -63,8 +63,16 @@ function characterToSystemPrompt(character: Character, rpMode: RpMode): string {
 
 function groupCastToPrompt(groupCharacters: Character[], primary: Character): string {
   const castList = groupCharacters
-    .map((c) => (c.personality ? `${c.name} — ${c.personality}` : c.name))
-    .join('\n')
+    .map((c) => {
+      const traits = [
+        c.appearance && `Appearance: ${c.appearance}`,
+        c.personality && `Personality: ${c.personality}`,
+        c.speechStyle && `Speech style: ${c.speechStyle}`,
+        c.background && `Background: ${c.background}`
+      ].filter(Boolean)
+      return traits.length > 0 ? `${c.name} —\n${traits.join('\n')}` : c.name
+    })
+    .join('\n\n')
   const exampleName = groupCharacters[0]?.name ?? 'CharacterName'
   return (
     `This is a Group Scene: besides ${primary.name}, these other cast members are also present and may speak:\n${castList}\n\n` +

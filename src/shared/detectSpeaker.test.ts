@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { detectSpeaker } from './detectSpeaker'
+import { detectSpeaker, stripSpeakerCue } from './detectSpeaker'
 import type { Character } from './types'
 
 function character(id: number, name: string): Character {
@@ -59,5 +59,37 @@ describe('detectSpeaker', () => {
 
   it('returns null for content with no colon-delimited cue at all', () => {
     expect(detectSpeaker('"Hi there," she said.', prompter, [aria])).toBeNull()
+  })
+})
+
+describe('stripSpeakerCue', () => {
+  const prompter = character(1, 'Prompter')
+  const aria = character(2, 'Aria')
+  const finn = character(3, 'Finn')
+
+  it('strips a bolded speaker cue naming a group cast member', () => {
+    expect(stripSpeakerCue('**Aria:** Hello there.', prompter, [aria, finn])).toBe('Hello there.')
+  })
+
+  it('strips a plain (non-bolded) speaker cue', () => {
+    expect(stripSpeakerCue('Aria: Hello there.', prompter, [aria, finn])).toBe('Hello there.')
+  })
+
+  it('strips a cue naming the primary character too, since it is still redundant', () => {
+    expect(stripSpeakerCue('**Prompter:** As always, welcome.', prompter, [aria])).toBe('As always, welcome.')
+  })
+
+  it('leaves content unchanged when there is no group cast', () => {
+    expect(stripSpeakerCue('Aria: Hello there.', prompter, [])).toBe('Aria: Hello there.')
+  })
+
+  it('leaves content unchanged when the leading name matches no cast member', () => {
+    expect(stripSpeakerCue('Warning: this cave is dangerous.', prompter, [aria])).toBe(
+      'Warning: this cave is dangerous.'
+    )
+  })
+
+  it('leaves content unchanged when there is no cue at all', () => {
+    expect(stripSpeakerCue('"Hi there," she said.', prompter, [aria])).toBe('"Hi there," she said.')
   })
 })

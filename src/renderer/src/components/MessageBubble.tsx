@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import {
   BookOpen,
+  Check,
   ChevronLeft,
   ChevronRight,
   Copy,
@@ -9,7 +10,8 @@ import {
   Pencil,
   RefreshCw,
   Star,
-  Trash2
+  Trash2,
+  Users
 } from 'lucide-react'
 import type { Character, ChatMessage, LoreEntry } from '@shared/types'
 import Avatar from './Avatar'
@@ -24,12 +26,14 @@ export default function MessageBubble({
   isStreaming,
   showSwipeControls,
   busyAction,
+  groupCast,
   onSetActiveVariant,
   onRegenerate,
   onContinue,
   onEdit,
   onDelete,
   onToggleBookmark,
+  onSetSpeaker,
   onFork
 }: {
   message: ChatMessage
@@ -40,12 +44,16 @@ export default function MessageBubble({
   /** Only the most recent assistant message shows regenerate/continue/swipe. */
   showSwipeControls: boolean
   busyAction: 'regenerate' | 'continue' | null
+  /** Every cast member (primary first) when this is a Group Scene reply, so the speaker can
+   *  be corrected by hand if it was misattributed — empty otherwise (menu item hidden). */
+  groupCast: Character[]
   onSetActiveVariant: (index: number) => void
   onRegenerate: () => void
   onContinue: () => void
   onEdit: (newContent: string) => void
   onDelete: () => void
   onToggleBookmark: () => void
+  onSetSpeaker: (characterId: number | null) => void
   onFork: () => void
 }): JSX.Element {
   const [editing, setEditing] = useState(false)
@@ -70,6 +78,8 @@ export default function MessageBubble({
     await navigator.clipboard.writeText(message.content)
   }
 
+  const currentSpeakerId = message.speakerCharacterId ?? groupCast[0]?.id ?? null
+
   const contextMenuItems: ContextMenuItem[] = [
     ...(showSwipeControls
       ? [
@@ -79,6 +89,13 @@ export default function MessageBubble({
       : []),
     { label: 'Edit', icon: Pencil, onClick: startEdit },
     { label: 'Copy', icon: Copy, onClick: copy },
+    ...(!isPending && groupCast.length > 0
+      ? groupCast.map((c) => ({
+          label: `Set speaker: ${c.name}`,
+          icon: c.id === currentSpeakerId ? Check : Users,
+          onClick: () => onSetSpeaker(c.id === groupCast[0]?.id ? null : c.id)
+        }))
+      : []),
     ...(!isPending
       ? [
           { label: message.bookmarked ? 'Remove Bookmark' : 'Bookmark', icon: Star, onClick: onToggleBookmark },

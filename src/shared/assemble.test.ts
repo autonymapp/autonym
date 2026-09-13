@@ -130,3 +130,26 @@ describe('assemblePrompt — mood and content intensity', () => {
     expect(explicit.messages[0].content).toContain('directly rather than fading to black')
   })
 })
+
+describe('assemblePrompt — Group Scene cast depth', () => {
+  it('gives each secondary cast member more than just a name and one-line personality', () => {
+    const finn = character({
+      id: 2,
+      name: 'Finn',
+      appearance: 'Lanky, sun-browned, a scar across one eyebrow.',
+      personality: 'Blunt but soft-hearted.',
+      speechStyle: 'Short sentences, dry humor, rarely swears.',
+      background: 'A retired courier who knows every back alley in the city.'
+    })
+    const { messages } = assemblePrompt({ ...baseParams(), groupCharacters: [finn] })
+    expect(messages[0].content).toContain('Lanky, sun-browned')
+    expect(messages[0].content).toContain('Short sentences, dry humor')
+    expect(messages[0].content).toContain('retired courier')
+  })
+
+  it('still works when a secondary character has no fields filled in', () => {
+    const blank = character({ id: 2, name: 'Blank', personality: '', speechStyle: '', appearance: '', background: '' })
+    const { messages } = assemblePrompt({ ...baseParams(), groupCharacters: [blank] })
+    expect(messages[0].content).toContain('Blank')
+  })
+})

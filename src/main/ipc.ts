@@ -31,7 +31,7 @@ import { exportStoryAsPdf } from './pdfExport'
 import { exportStoryAsEpub } from './epubExport'
 import { CHAT_PRESETS, CLERICAL_MODEL_ID } from '@shared/presets'
 import { assemblePrompt } from '@shared/assemble'
-import { detectSpeaker } from '@shared/detectSpeaker'
+import { detectSpeaker, stripSpeakerCue } from '@shared/detectSpeaker'
 import { assertExists } from '@shared/assertExists'
 import { resolveCharacterInheritance } from '@shared/characterInheritance'
 import { parseCharacterImport, parseLorebookImport, parsePresetImport } from '@shared/importers'
@@ -521,6 +521,9 @@ export function registerIpcHandlers(getWindow: () => BrowserWindow | null): void
     })
   })
   ipcMain.handle('messages:toggleBookmark', (_e, id: number) => messageRepo.toggleBookmark(id))
+  ipcMain.handle('messages:setSpeaker', (_e, id: number, speakerCharacterId: number | null) =>
+    messageRepo.setSpeaker(id, speakerCharacterId)
+  )
 
   // Writing stats
   ipcMain.handle('stats:overview', () => {
@@ -674,8 +677,10 @@ export function registerIpcHandlers(getWindow: () => BrowserWindow | null): void
         },
         controller.signal
       )
+      const speakerCharacterId = detectSpeaker(fullContent, character, groupCharacters)
+      fullContent = stripSpeakerCue(fullContent, character, groupCharacters)
       messageRepo.updateContent(assistantMessage.id, fullContent)
-      messageRepo.setSpeaker(assistantMessage.id, detectSpeaker(fullContent, character, groupCharacters))
+      messageRepo.setSpeaker(assistantMessage.id, speakerCharacterId)
       win?.webContents.send('chat:stream-chunk', {
         chatId,
         messageId: assistantMessage.id,
@@ -759,9 +764,9 @@ export function registerIpcHandlers(getWindow: () => BrowserWindow | null): void
       contentIntensity: chat.contentIntensity
     })
 
-    const text = await getCompletion(chat.modelId, messages, samplerOptions(chat))
-    const updated = messageRepo.addVariant(messageId, text.trim())
-    const speakerCharacterId = detectSpeaker(text.trim(), character, groupCharacters)
+    const rawText = (await getCompletion(chat.modelId, messages, samplerOptions(chat))).trim()
+    const speakerCharacterId = detectSpeaker(rawText, character, groupCharacters)
+    const updated = messageRepo.addVariant(messageId, stripSpeakerCue(rawText, character, groupCharacters))
     messageRepo.setSpeaker(messageId, speakerCharacterId)
     const matchedLoreEntryIds = matchedLoreEntries.map((e) => e.id)
     messageRepo.setMatchedLoreEntries(messageId, matchedLoreEntryIds)
@@ -909,8 +914,10 @@ export function registerIpcHandlers(getWindow: () => BrowserWindow | null): void
               },
               controller.signal
             )
+            const speakerCharacterId = detectSpeaker(fullContent, character, groupCharacters)
+            fullContent = stripSpeakerCue(fullContent, character, groupCharacters)
             messageRepo.updateContent(assistantMessage.id, fullContent)
-            messageRepo.setSpeaker(assistantMessage.id, detectSpeaker(fullContent, character, groupCharacters))
+            messageRepo.setSpeaker(assistantMessage.id, speakerCharacterId)
             win?.webContents.send('chat:stream-chunk', {
               chatId,
               messageId: assistantMessage.id,

@@ -205,7 +205,9 @@ const api = {
       ipcRenderer.invoke('messages:updateContent', id, content),
     search: (query: string): Promise<MessageSearchResult[]> => ipcRenderer.invoke('messages:search', query),
     listBookmarked: (): Promise<MessageSearchResult[]> => ipcRenderer.invoke('messages:listBookmarked'),
-    toggleBookmark: (id: number): Promise<ChatMessage> => ipcRenderer.invoke('messages:toggleBookmark', id)
+    toggleBookmark: (id: number): Promise<ChatMessage> => ipcRenderer.invoke('messages:toggleBookmark', id),
+    setSpeaker: (id: number, speakerCharacterId: number | null): Promise<ChatMessage> =>
+      ipcRenderer.invoke('messages:setSpeaker', id, speakerCharacterId)
   },
   settings: {
     hasApiKey: () => ipcRenderer.invoke('settings:hasApiKey'),
