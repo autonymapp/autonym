@@ -776,20 +776,18 @@ export default function ChatPage(): JSX.Element {
           </div>
         )}
         {modes.length > 0 && (
-          <div className="segmented" style={{ maxWidth: 480, marginBottom: 16 }}>
-            <button className={modeFilter === null ? 'active' : ''} onClick={() => setModeFilter(null)}>
-              All
-            </button>
+          <select
+            value={modeFilter === null ? '' : modeFilter}
+            onChange={(e) => setModeFilter(e.target.value === '' ? null : Number(e.target.value))}
+            style={{ width: 180, marginBottom: 16 }}
+          >
+            <option value="">All Universes</option>
             {modes.map((universe) => (
-              <button
-                key={universe.id}
-                className={modeFilter === universe.id ? 'active' : ''}
-                onClick={() => setModeFilter(universe.id)}
-              >
+              <option key={universe.id} value={universe.id}>
                 {universe.name}
-              </button>
+              </option>
             ))}
-          </div>
+          </select>
         )}
         {characters.length === 0 ? (
           <div className="empty-state">No characters yet — create one on the Characters page.</div>

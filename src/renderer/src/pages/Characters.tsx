@@ -452,35 +452,40 @@ export default function CharactersPage(): JSX.Element {
         )
       ) : (
         <>
-          {universes.length > 0 && (
-            <div className="segmented" style={{ maxWidth: 560, marginTop: 16 }}>
-              <button className={universeFilter === null ? 'active' : ''} onClick={() => setUniverseFilter(null)}>
-                All
-              </button>
-              {universes.map((u) => (
-                <button
-                  key={u.id}
-                  className={universeFilter === u.id ? 'active' : ''}
-                  onClick={() => setUniverseFilter(u.id)}
+          {(universes.length > 0 || allTags.length > 0) && (
+            <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
+              {universes.length > 0 && (
+                <select
+                  value={universeFilter === null ? '' : universeFilter}
+                  onChange={(e) => {
+                    const v = e.target.value
+                    setUniverseFilter(v === '' ? null : v === 'none' ? 'none' : Number(v))
+                  }}
+                  style={{ width: 180 }}
                 >
-                  {u.name}
-                </button>
-              ))}
-              <button className={universeFilter === 'none' ? 'active' : ''} onClick={() => setUniverseFilter('none')}>
-                No Universe
-              </button>
-            </div>
-          )}
-          {allTags.length > 0 && (
-            <div className="segmented" style={{ maxWidth: 480, marginTop: 8 }}>
-              <button className={tagFilter === null ? 'active' : ''} onClick={() => setTagFilter(null)}>
-                All Tags
-              </button>
-              {allTags.map((tag) => (
-                <button key={tag} className={tagFilter === tag ? 'active' : ''} onClick={() => setTagFilter(tag)}>
-                  {tag}
-                </button>
-              ))}
+                  <option value="">All Universes</option>
+                  {universes.map((u) => (
+                    <option key={u.id} value={u.id}>
+                      {u.name}
+                    </option>
+                  ))}
+                  <option value="none">No Universe</option>
+                </select>
+              )}
+              {allTags.length > 0 && (
+                <select
+                  value={tagFilter ?? ''}
+                  onChange={(e) => setTagFilter(e.target.value || null)}
+                  style={{ width: 180 }}
+                >
+                  <option value="">All Tags</option>
+                  {allTags.map((tag) => (
+                    <option key={tag} value={tag}>
+                      {tag}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
           )}
           {characters.length === 0 ? (

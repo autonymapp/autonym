@@ -46,6 +46,7 @@ export default function LorebooksPage(): JSX.Element {
   const [metaCanon, setMetaCanon] = useState(false)
   const [metaUniverseId, setMetaUniverseId] = useState<number | null>(null)
   const [universes, setUniverses] = useState<Universe[]>([])
+  const [universeFilter, setUniverseFilter] = useState<number | 'none' | null>(null)
   const [showStarterPacks, setShowStarterPacks] = useState(false)
   const [importingPackId, setImportingPackId] = useState<string | null>(null)
   const [importingPackFile, setImportingPackFile] = useState(false)
@@ -371,8 +372,32 @@ export default function LorebooksPage(): JSX.Element {
         )}
         {importError && <p className="hint" style={{ color: 'var(--danger)', marginTop: 6 }}>{importError}</p>}
         {packStatus && <p className="hint" style={{ marginTop: 6 }}>{packStatus}</p>}
+        {universes.length > 0 && (
+          <select
+            value={universeFilter === null ? '' : universeFilter}
+            onChange={(e) => {
+              const v = e.target.value
+              setUniverseFilter(v === '' ? null : v === 'none' ? 'none' : Number(v))
+            }}
+            style={{ width: '100%', marginTop: 14 }}
+          >
+            <option value="">All Universes</option>
+            {universes.map((u) => (
+              <option key={u.id} value={u.id}>
+                {u.name}
+              </option>
+            ))}
+            <option value="none">No Universe</option>
+          </select>
+        )}
         <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 2 }}>
-          {lorebooks.map((lb) => (
+          {lorebooks
+            .filter((lb) => {
+              if (universeFilter === null) return true
+              if (universeFilter === 'none') return lb.universeId === null
+              return lb.universeId === universeFilter
+            })
+            .map((lb) => (
             <div
               key={lb.id}
               role="button"
