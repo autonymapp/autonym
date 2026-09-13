@@ -99,8 +99,6 @@ export default function ChatPage(): JSX.Element {
   const [renameDraft, setRenameDraft] = useState('')
   const [modeFilter, setModeFilter] = useState<number | null>(null)
   const [newActTitleDraft, setNewActTitleDraft] = useState('')
-  const [creatingSkit, setCreatingSkit] = useState(false)
-  const [skitLengthDraft, setSkitLengthDraft] = useState<SkitLength>('short')
   const [skitGenerating, setSkitGenerating] = useState(false)
   const [skitError, setSkitError] = useState<string | null>(null)
   const [directorsNotesDraft, setDirectorsNotesDraft] = useState('')
@@ -968,40 +966,9 @@ export default function ChatPage(): JSX.Element {
           <button className="btn btn-primary btn-sm" onClick={() => newChat('dm')}>
             + Dialogue/Direct Message RP
           </button>
-          {creatingSkit ? (
-            <div className="panel" style={{ padding: 10, display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <span className="hint">
-                A Skit writes itself — pick a length, add cast and a premise once it's created,
-                then hit Generate.
-              </span>
-              <div className="segmented">
-                <button className={skitLengthDraft === 'short' ? 'active' : ''} onClick={() => setSkitLengthDraft('short')}>
-                  Short
-                </button>
-                <button className={skitLengthDraft === 'medium' ? 'active' : ''} onClick={() => setSkitLengthDraft('medium')}>
-                  Medium
-                </button>
-              </div>
-              <div style={{ display: 'flex', gap: 6 }}>
-                <button
-                  className="btn btn-primary btn-sm"
-                  onClick={() => {
-                    newChat('narrative', skitLengthDraft)
-                    setCreatingSkit(false)
-                  }}
-                >
-                  Create Skit
-                </button>
-                <button className="btn btn-ghost btn-sm" onClick={() => setCreatingSkit(false)}>
-                  Cancel
-                </button>
-              </div>
-            </div>
-          ) : (
-            <button className="btn btn-sm" onClick={() => setCreatingSkit(true)}>
-              <Sparkles size={13} style={{ marginRight: 6 }} /> + New Skit
-            </button>
-          )}
+          <button className="btn btn-ghost btn-sm" onClick={() => setPage('scenarios')}>
+            <Sparkles size={13} style={{ marginRight: 6 }} /> Write a Skit in Improvise
+          </button>
         </div>
         <div className="section-title">Acts</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -1292,6 +1259,7 @@ export default function ChatPage(): JSX.Element {
                 <div style={{ display: 'flex', gap: 6, flexShrink: 0, position: 'relative' }}>
                   <button
                     className="btn btn-sm"
+                    data-tour="chat-story-tools-btn"
                     onClick={() => setToolsMenuOpen((o) => !o)}
                     disabled={continuing || forking || journaling || extractingCharacter}
                   >
@@ -1374,7 +1342,7 @@ export default function ChatPage(): JSX.Element {
                       )}
                     </div>
                   )}
-                  <button className="btn btn-sm" onClick={() => setShowSettings((s) => !s)}>
+                  <button className="btn btn-sm" data-tour="chat-model-settings-btn" onClick={() => setShowSettings((s) => !s)}>
                     {showSettings ? (
                       'Hide Settings'
                     ) : (
@@ -1636,7 +1604,7 @@ export default function ChatPage(): JSX.Element {
                     <MapIcon size={14} style={{ color: 'var(--accent)' }} /> Scenario
                   </summary>
                   <p className="hint" style={{ margin: '8px 0' }}>
-                    Attach a scene setup and milestone roadmap from Scenario Maker to guide where this
+                    Attach a scene setup and milestone roadmap from Improvise to guide where this
                     act heads.
                   </p>
                   <select
@@ -1748,7 +1716,7 @@ export default function ChatPage(): JSX.Element {
                     className="section-title"
                     style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
                   >
-                    <Flame size={14} style={{ color: 'var(--accent)' }} /> Content Intensity
+                    <Flame size={14} style={{ color: 'var(--accent)' }} /> Rating
                   </summary>
                   <div className="segmented" style={{ marginBottom: 8 }}>
                     <button
@@ -1850,7 +1818,7 @@ export default function ChatPage(): JSX.Element {
 
                 {settingsTab === 'model' && (
                 <>
-                <div className="section-title">RP Mode</div>
+                <div className="section-title">Writing Style</div>
                 <div className="segmented" style={{ marginBottom: 18 }}>
                   {(Object.keys(RP_MODE_LABELS) as RpMode[]).map((mode) => (
                     <button
@@ -1909,7 +1877,7 @@ export default function ChatPage(): JSX.Element {
                 {settingsView === 'simple' ? (
                   <>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <div className="section-title" style={{ margin: 0 }}>RP-Ready Styles</div>
+                      <div className="section-title" style={{ margin: 0 }}>Style Presets</div>
                       <button className="btn btn-sm" onClick={handleImportPreset} disabled={importingPreset}>
                         {importingPreset ? 'Importing…' : 'Import Style'}
                       </button>

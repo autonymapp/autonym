@@ -1,12 +1,18 @@
 import { useEffect, useState } from 'react'
-import type { Scenario, ScenarioInput } from '@shared/types'
+import type { Chat, Character, Scenario, ScenarioInput } from '@shared/types'
+import { CHAT_PRESETS } from '@shared/presets'
 import MilestoneEditor from '../components/MilestoneEditor'
 import AutoGrowTextarea from '../components/AutoGrowTextarea'
+import Avatar from '../components/Avatar'
 import { useConfirm } from '../components/ConfirmDialog'
 import ContextMenu from '../components/ContextMenu'
-import { ArrowLeft, Pencil, Trash2 } from 'lucide-react'
+import { useAppStore } from '../store/appStore'
+import { ArrowLeft, Pencil, Sparkles, Trash2 } from 'lucide-react'
+
+type SkitLength = 'short' | 'medium'
 
 export default function ScenarioMakerPage(): JSX.Element {
+  const { setPage, setActiveCharacterId, setActiveChatId } = useAppStore()
   const confirm = useConfirm()
   const [scenarios, setScenarios] = useState<Scenario[]>([])
   const [scenarioContextMenu, setScenarioContextMenu] = useState<{ scenarioId: number; x: number; y: number } | null>(
@@ -17,13 +23,70 @@ export default function ScenarioMakerPage(): JSX.Element {
   const [description, setDescription] = useState('')
   const [milestones, setMilestones] = useState<string[]>([])
 
+  const [characters, setCharacters] = useState<Character[]>([])
+  const [skits, setSkits] = useState<Chat[]>([])
+  const [creatingSkit, setCreatingSkit] = useState(false)
+  const [skitCharacterId, setSkitCharacterId] = useState<number | null>(null)
+  const [skitLength, setSkitLength] = useState<SkitLength>('short')
+
   async function refresh(): Promise<void> {
     setScenarios(await window.api.scenarios.list())
   }
 
+  async function refreshSkits(): Promise<void> {
+    const [chats, chars] = await Promise.all([window.api.chats.listAll(), window.api.characters.list()])
+    setSkits(chats.filter((c) => c.isSkit))
+    setCharacters(chars)
+    if (skitCharacterId === null && chars.length > 0) setSkitCharacterId(chars[0].id)
+  }
+
   useEffect(() => {
     refresh()
+    refreshSkits()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  async function createSkit(): Promise<void> {
+    if (!skitCharacterId) return
+    const preset = CHAT_PRESETS[0]
+    const chat = await window.api.chats.create({
+      characterId: skitCharacterId,
+      personaId: null,
+      impersonatingCharacterId: null,
+      scenarioId: null,
+      scenarioMilestoneIndex: 0,
+      priorSummary: null,
+      storylineId: null,
+      collaborativeMode: false,
+      tags: [],
+      directorsNotes: '',
+      inFictionDate: null,
+      groupCharacterIds: [],
+      universeId: null,
+      isSkit: true,
+      skitLength,
+      moodPreset: null,
+      contentIntensity: 'standard',
+      title: `Skit ${skits.length + 1}`,
+      modelId: preset.modelId,
+      rpMode: 'narrative',
+      samplerSettings: preset.samplerSettings
+    })
+    setCreatingSkit(false)
+    openSkit(chat)
+  }
+
+  function openSkit(chat: Chat): void {
+    setActiveCharacterId(chat.characterId)
+    setActiveChatId(chat.id)
+    setPage('chat')
+  }
+
+  async function deleteSkit(chat: Chat): Promise<void> {
+    if (!(await confirm(`Delete "${chat.title}"? This can't be undone.`, { title: 'Delete this Skit?' }))) return
+    await window.api.chats.delete(chat.id)
+    setSkits((prev) => prev.filter((c) => c.id !== chat.id))
+  }
 
   function startEdit(s: Scenario | 'new'): void {
     if (s === 'new') {
@@ -119,9 +182,15 @@ export default function ScenarioMakerPage(): JSX.Element {
 
   return (
     <div style={{ padding: '24px 28px', height: '100%', overflowY: 'auto' }}>
+      <h2 style={{ marginBottom: 4 }}>Improvise</h2>
+      <p className="hint" style={{ marginBottom: 24 }}>
+        Reusable scene setups and unattended Skits — the two ways to hand a story some shape
+        without writing every beat of it yourself.
+      </p>
+
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2>Scenario Maker</h2>
-        <button className="btn btn-primary" onClick={() => startEdit('new')}>
+        <div className="section-title" style={{ margin: 0 }}>Scenarios</div>
+        <button className="btn btn-primary btn-sm" onClick={() => startEdit('new')}>
           + New Scenario
         </button>
       </div>
@@ -134,10 +203,11 @@ export default function ScenarioMakerPage(): JSX.Element {
         <div className="empty-state">No scenarios yet. Create one to get started.</div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 14 }}>
-          {scenarios.map((s) => (
+          {scenarios.map((s, i) => (
             <div
               key={s.id}
               className="card"
+              data-tour={i === 0 ? 'scenario-card' : undefined}
               onContextMenu={(e) => {
                 e.preventDefault()
                 setScenarioContextMenu({ scenarioId: s.id, x: e.clientX, y: e.clientY })
@@ -188,6 +258,100 @@ export default function ScenarioMakerPage(): JSX.Element {
             />
           )
         })()}
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 32 }}>
+        <div className="section-title" style={{ margin: 0 }}>Skits</div>
+        {!creatingSkit && (
+          <button
+            className="btn btn-primary btn-sm"
+            data-tour="skits-new-btn"
+            onClick={() => setCreatingSkit(true)}
+            disabled={characters.length === 0}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+          >
+            <Sparkles size={13} /> New Skit
+          </button>
+        )}
+      </div>
+      <p className="hint" style={{ marginTop: 8, marginBottom: 20 }}>
+        Unattended short-story generation — pick a Cast member and a length, and the AI writes a
+        complete scene end to end. {characters.length === 0 && 'Add a Cast member first to create one.'}
+      </p>
+
+      {creatingSkit && (
+        <div className="panel" style={{ padding: 14, marginBottom: 20, display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 360 }}>
+          <label className="field">
+            <span className="label">Cast member</span>
+            <select
+              value={skitCharacterId ?? ''}
+              onChange={(e) => setSkitCharacterId(parseInt(e.target.value))}
+            >
+              {characters.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <div className="segmented">
+            <button className={skitLength === 'short' ? 'active' : ''} onClick={() => setSkitLength('short')}>
+              Short
+            </button>
+            <button className={skitLength === 'medium' ? 'active' : ''} onClick={() => setSkitLength('medium')}>
+              Medium
+            </button>
+          </div>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <button className="btn btn-primary btn-sm" onClick={createSkit} disabled={!skitCharacterId}>
+              Create Skit
+            </button>
+            <button className="btn btn-ghost btn-sm" onClick={() => setCreatingSkit(false)}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {skits.length === 0 ? (
+        <div className="empty-state">No Skits yet. Create one to get started.</div>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 14 }}>
+          {skits.map((skit) => {
+            const skitCharacter = characters.find((c) => c.id === skit.characterId)
+            return (
+              <div key={skit.id} className="card" style={{ cursor: 'pointer' }} onClick={() => openSkit(skit)}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Avatar
+                    avatarType={skitCharacter?.avatarType}
+                    src={skitCharacter?.avatarPath ?? null}
+                    emoji={skitCharacter?.avatarEmoji}
+                    name={skitCharacter?.name ?? '?'}
+                    size={26}
+                  />
+                  <div style={{ fontWeight: 700, fontSize: 14 }}>{skit.title}</div>
+                </div>
+                <div className="hint" style={{ marginTop: 8 }}>
+                  {skitCharacter?.name ?? 'Unknown'} · {skit.skitLength === 'medium' ? 'Medium' : 'Short'}
+                </div>
+                <div style={{ display: 'flex', gap: 6, marginTop: 12 }}>
+                  <button className="btn btn-sm" onClick={(e) => { e.stopPropagation(); openSkit(skit) }}>
+                    Open
+                  </button>
+                  <button
+                    className="btn btn-danger btn-sm"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      deleteSkit(skit)
+                    }}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }

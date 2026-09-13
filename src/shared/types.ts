@@ -145,8 +145,8 @@ export type CustomPresetInput = Omit<CustomPreset, 'id' | 'createdAt'>
 export type RpMode = 'narrative' | 'dm'
 
 export const RP_MODE_LABELS: Record<RpMode, string> = {
-  narrative: 'Story/Narrative RP',
-  dm: 'Dialogue/Direct Message RP'
+  narrative: 'Story / Narrative',
+  dm: 'Dialogue / Direct Message'
 }
 
 export type MoodPreset = 'slow-burn' | 'high-action' | 'cinematic' | 'slice-of-life'

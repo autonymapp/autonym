@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import { Check, Code2, Download, ExternalLink, RefreshCw, Upload } from 'lucide-react'
+import { Check, Code2, Compass, Download, ExternalLink, Pencil, Plus, RefreshCw, Trash2, Upload } from 'lucide-react'
+import type { Persona } from '@shared/types'
 import { useConfirm } from '../components/ConfirmDialog'
+import AutoGrowTextarea from '../components/AutoGrowTextarea'
+import { useAppStore } from '../store/appStore'
 import {
   applyAccent,
   applyBoldFormatting,
@@ -41,6 +44,7 @@ interface StatsOverview {
 /** Jump-to links for the section nav — order matches the sections as they appear on the page. */
 const SECTIONS: { id: string; label: string }[] = [
   { id: 'profile', label: 'Profile' },
+  { id: 'personas', label: 'Personas' },
   { id: 'shortcuts', label: 'Keyboard Shortcuts' },
   { id: 'theme', label: 'Theme' },
   { id: 'accent', label: 'Accent Color' },
@@ -53,6 +57,7 @@ const SECTIONS: { id: string; label: string }[] = [
 ]
 
 export default function SettingsPage(): JSX.Element {
+  const { openTour } = useAppStore()
   const [profileName, setProfileNameState] = useState(getStoredProfileName())
   const [hasKey, setHasKey] = useState(false)
   const [keyInput, setKeyInput] = useState('')
@@ -73,8 +78,56 @@ export default function SettingsPage(): JSX.Element {
   const [checkingUpdate, setCheckingUpdate] = useState(false)
   const [updateStatus, setUpdateStatus] = useState<string | null>(null)
   const [activeSection, setActiveSection] = useState(SECTIONS[0].id)
+  const [personas, setPersonas] = useState<Persona[]>([])
+  const [personaEditingId, setPersonaEditingId] = useState<number | 'new' | null>(null)
+  const [personaNameDraft, setPersonaNameDraft] = useState('')
+  const [personaDescriptionDraft, setPersonaDescriptionDraft] = useState('')
   const contentRef = useRef<HTMLDivElement>(null)
   const confirm = useConfirm()
+
+  useEffect(() => {
+    window.api.personas.list().then(setPersonas)
+  }, [])
+
+  function startNewPersona(): void {
+    setPersonaEditingId('new')
+    setPersonaNameDraft('')
+    setPersonaDescriptionDraft('')
+  }
+
+  function startEditPersona(persona: Persona): void {
+    setPersonaEditingId(persona.id)
+    setPersonaNameDraft(persona.name)
+    setPersonaDescriptionDraft(persona.description)
+  }
+
+  function cancelPersonaEdit(): void {
+    setPersonaEditingId(null)
+  }
+
+  async function savePersona(): Promise<void> {
+    const name = personaNameDraft.trim()
+    if (!name) return
+    if (personaEditingId === 'new') {
+      const persona = await window.api.personas.create({ name, description: personaDescriptionDraft.trim() })
+      setPersonas((prev) => [...prev, persona].sort((a, b) => a.name.localeCompare(b.name)))
+    } else if (personaEditingId !== null) {
+      const persona = await window.api.personas.update(personaEditingId, {
+        name,
+        description: personaDescriptionDraft.trim()
+      })
+      setPersonas((prev) =>
+        prev.map((p) => (p.id === persona.id ? persona : p)).sort((a, b) => a.name.localeCompare(b.name))
+      )
+    }
+    setPersonaEditingId(null)
+  }
+
+  async function deletePersonaFromSettings(persona: Persona): Promise<void> {
+    if (!(await confirm(`Delete "${persona.name}"? This can't be undone.`, { title: 'Delete Persona?' }))) return
+    await window.api.personas.delete(persona.id)
+    setPersonas((prev) => prev.filter((p) => p.id !== persona.id))
+  }
 
   function handleContentScroll(): void {
     const container = contentRef.current
@@ -264,6 +317,99 @@ export default function SettingsPage(): JSX.Element {
             style={{ maxWidth: 280 }}
           />
         </label>
+      </div>
+
+      <div id="personas" className="panel" style={{ padding: 18, marginBottom: 18, scrollMarginTop: 12 }}>
+        <h3 style={{ marginBottom: 4 }}>🎭 Personas</h3>
+        <p className="hint" style={{ marginBottom: 12 }}>
+          An alter-ego you write as in an Act instead of yourself — a lightweight name and
+          description, sent to the AI so it knows who it's talking to. Pick one per Act from its
+          "Who You're Playing As" settings.
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12 }}>
+          {personas.map((persona) =>
+            personaEditingId === persona.id ? (
+              <div key={persona.id} className="panel" style={{ padding: 12, background: 'var(--bg-sunken)' }}>
+                <input
+                  autoFocus
+                  value={personaNameDraft}
+                  onChange={(e) => setPersonaNameDraft(e.target.value)}
+                  placeholder="Persona name"
+                  style={{ width: '100%', marginBottom: 6 }}
+                />
+                <AutoGrowTextarea
+                  rows={2}
+                  value={personaDescriptionDraft}
+                  onChange={setPersonaDescriptionDraft}
+                  placeholder="A few words about them (optional)"
+                  style={{ width: '100%', marginBottom: 8 }}
+                />
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <button className="btn btn-sm btn-primary" onClick={savePersona} disabled={!personaNameDraft.trim()}>
+                    Save
+                  </button>
+                  <button className="btn btn-ghost btn-sm" onClick={cancelPersonaEdit}>
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div
+                key={persona.id}
+                className="panel"
+                style={{ padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 10, background: 'var(--bg-sunken)' }}
+              >
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 600, fontSize: 13 }}>{persona.name}</div>
+                  {persona.description && (
+                    <div className="hint" style={{ marginTop: 2 }}>
+                      {persona.description}
+                    </div>
+                  )}
+                </div>
+                <button className="msg-action-btn" title="Edit" onClick={() => startEditPersona(persona)}>
+                  <Pencil size={14} />
+                </button>
+                <button className="msg-action-btn" title="Delete" onClick={() => deletePersonaFromSettings(persona)}>
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            )
+          )}
+          {personas.length === 0 && personaEditingId !== 'new' && (
+            <p className="hint" style={{ margin: 0 }}>No personas yet.</p>
+          )}
+        </div>
+        {personaEditingId === 'new' ? (
+          <div className="panel" style={{ padding: 12, background: 'var(--bg-sunken)' }}>
+            <input
+              autoFocus
+              value={personaNameDraft}
+              onChange={(e) => setPersonaNameDraft(e.target.value)}
+              placeholder="Persona name"
+              style={{ width: '100%', marginBottom: 6 }}
+            />
+            <AutoGrowTextarea
+              rows={2}
+              value={personaDescriptionDraft}
+              onChange={setPersonaDescriptionDraft}
+              placeholder="A few words about them (optional)"
+              style={{ width: '100%', marginBottom: 8 }}
+            />
+            <div style={{ display: 'flex', gap: 6 }}>
+              <button className="btn btn-sm btn-primary" onClick={savePersona} disabled={!personaNameDraft.trim()}>
+                Add
+              </button>
+              <button className="btn btn-ghost btn-sm" onClick={cancelPersonaEdit}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button className="btn btn-ghost btn-sm" onClick={startNewPersona} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <Plus size={14} /> New Persona
+          </button>
+        )}
       </div>
 
       <div id="shortcuts" className="panel" style={{ padding: 18, marginBottom: 18, scrollMarginTop: 12 }}>
@@ -553,6 +699,13 @@ export default function SettingsPage(): JSX.Element {
           raw AI chat for roleplay and story-writing. Free and open-source under the MIT license.
         </p>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
+          <button
+            className="btn btn-sm"
+            onClick={openTour}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+          >
+            <Compass size={14} /> Take the Tour
+          </button>
           <button
             className="btn btn-sm"
             onClick={() => window.api.app.openExternal('https://github.com/autonymapp/autonym')}

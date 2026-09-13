@@ -1,4 +1,9 @@
-const FORMAT_REGEX = /\(\(([^)]+)\)\)|\*([^*]+)\*|"([^"]+)"|~([^~]+)~/g
+// Each alternative's content class excludes the other markers' delimiters, so a
+// dialogue quote that never closes before an *action* beat or ~thought~ can't swallow
+// that marker whole (turning its literal asterisks/tildes into "bold quoted text"
+// instead of parsing them) — it just fails to match and falls through as plain text
+// for that stray quote character, while the action/thought still parses correctly.
+const FORMAT_REGEX = /\(\(([^)]+)\)\)|\*([^*"~]+)\*|"([^"*~]+)"|~([^~"*]+)~/g
 
 /**
  * Renders RP text with the app's formatting convention styled distinctly:

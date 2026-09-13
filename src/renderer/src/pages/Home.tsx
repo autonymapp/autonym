@@ -113,7 +113,7 @@ export default function HomePage(): JSX.Element {
         </div>
       )}
 
-      <div className="section-title">Recent Acts</div>
+      <div className="section-title" data-tour="home-recent-acts">Recent Acts</div>
       {recentActs.length === 0 ? (
         <div className="empty-state" style={{ marginBottom: 24 }}>
           No acts yet — pick a cast member below to start one.
@@ -155,7 +155,7 @@ export default function HomePage(): JSX.Element {
         </div>
       )}
 
-      <div className="section-title">Cast</div>
+      <div className="section-title" data-tour="home-cast">Cast</div>
       {characters.length === 0 ? (
         <div className="empty-state">No cast members yet — create one on the Cast page.</div>
       ) : (

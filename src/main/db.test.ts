@@ -99,7 +99,11 @@ describe('initDb — backfill/migration', () => {
       nextId: 3,
       characters: [
         { id: 1, name: 'Aria', avatarType: 'monogram', firstMessage: '', notes: '', settingTag: 'Sengoku' },
-        { id: 2, name: 'Kaoru', avatarType: 'monogram', firstMessage: '', notes: '', settingTag: 'Sengoku' }
+        { id: 2, name: 'Kaoru', avatarType: 'monogram', firstMessage: '', notes: '', settingTag: 'Sengoku' },
+        // Tagged 'tutorial' so initDb's missing-tutorial-content recovery path doesn't also
+        // seed Nym (and a second Universe alongside it), which isn't what this test covers.
+        // High id, well clear of nextId, so it can't collide with anything auto-created below.
+        { id: 99, name: 'Placeholder', avatarType: 'monogram', firstMessage: '', notes: '', tags: ['tutorial'] }
       ],
       chats: [],
       messages: [],

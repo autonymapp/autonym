@@ -10,7 +10,8 @@ const LOREBOOK_SCAN_MESSAGES = 6
 const RP_MODE_INSTRUCTIONS: Record<RpMode, string> = {
   narrative:
     'Write in a story/narrative roleplay style: descriptive prose with narration of actions, expressions, and surroundings, alongside dialogue. Use third person unless the character sheet says otherwise. ' +
-    'Formatting convention — apply this consistently in every response: wrap spoken dialogue in "double quotes", wrap physical actions/narration in *asterisks*, and wrap internal thoughts in ~tildes~.',
+    'Formatting convention — apply this consistently in every response: wrap spoken dialogue in "double quotes", wrap physical actions/narration in *asterisks*, and wrap internal thoughts in ~tildes~. ' +
+    "If an action or thought beat interrupts a line of speech, close the open quote before it and open a fresh one after — never leave dialogue \"unclosed\" across an *action* or ~thought~ aside, since each marker must be self-contained and not nested inside another.",
   dm:
     'Write in a direct-message/texting style: short, casual chat lines only, like the character is texting the user. No narration, no scene-setting, no describing actions or surroundings in prose — just what they would actually type. ' +
     'Formatting convention: write dialogue as plain text (no quote marks needed, like a real text message); skip *asterisk* actions/narration entirely in this mode; if you want to reveal an internal thought, wrap it in ~tildes~.'

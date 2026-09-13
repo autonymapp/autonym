@@ -85,6 +85,13 @@ export default function LorebooksPage(): JSX.Element {
     window.api.universes.list().then(setUniverses).catch((err) => setLoadError(friendlyError(err)))
   }, [])
 
+  // Landing on an empty "select or create a lorebook" screen when one already exists is just
+  // friction — default to the first one instead, same as opening any other list-based page.
+  useEffect(() => {
+    if (!selected && lorebooks.length > 0) setSelected(lorebooks[0])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lorebooks])
+
   useEffect(() => {
     if (showTrash) refreshTrash()
   }, [showTrash])
@@ -601,10 +608,11 @@ export default function LorebooksPage(): JSX.Element {
             )}
 
             <div style={{ marginTop: 18, display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {entries.map((entry) => (
+              {entries.map((entry, i) => (
                 <div
                   key={entry.id}
                   className="card"
+                  data-tour={i === 0 ? 'lorebook-entry' : undefined}
                   onContextMenu={(e) => {
                     e.preventDefault()
                     setEntryContextMenu({ entryId: entry.id, x: e.clientX, y: e.clientY })

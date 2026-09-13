@@ -54,6 +54,13 @@ export default function UniversesPage(): JSX.Element {
     refresh()
   }, [])
 
+  // Landing on an empty "select or create a universe" screen when one already exists is just
+  // friction — default to the first one instead, same as opening any other list-based page.
+  useEffect(() => {
+    if (!selected && universes.length > 0) setSelected(universes[0])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [universes])
+
   useEffect(() => {
     if (showTrash) refreshTrash()
   }, [showTrash])
@@ -290,7 +297,7 @@ export default function UniversesPage(): JSX.Element {
           <div className="empty-state">Select or create a universe.</div>
         ) : (
           <>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }} data-tour="universe-detail">
               <h2 style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <Globe size={20} style={{ color: 'var(--accent)' }} /> {selected.name}
               </h2>
