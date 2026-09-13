@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Autonym — AI roleplay &amp; story-writing, structured</title>
-<meta name="description" content="A free, fully local AI roleplay and story-writing app. Structured Casts and Lorebooks, Beat Sheet pacing, and transparent pricing via OpenRouter." />
+<meta name="description" content="A free, fully local AI roleplay and story-writing app, currently in beta. Structured Casts and Lorebooks, Beat Sheet pacing, and transparent pricing via OpenRouter." />
 <link rel="icon" type="image/png" href="assets/icon-512.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="styles.css" />
 
 <meta property="og:title" content="Autonym — AI roleplay &amp; story-writing, structured" />
-<meta property="og:description" content="A compendium-first desktop app for solo roleplayers and authors. Beat Sheets, Universes, Skits, and honest per-message pricing over OpenRouter." />
+<meta property="og:description" content="A compendium-first desktop app for solo roleplayers and authors, currently in beta. Beat Sheets, Universes, Skits, and honest per-message pricing over OpenRouter." />
 <meta property="og:image" content="https://autonym.app/assets/icon-1024.png" />
 <meta property="og:url" content="https://autonym.app/" />
 <meta name="twitter:card" content="summary" />
@@ -24,11 +24,16 @@
     <a class="brand" href="#top">
       <img class="mark" src="assets/icon-512.png" alt="" />
       <span>Autonym</span>
+      <span class="beta-pill">Beta</span>
     </a>
     <nav class="nav-links">
       <a href="#features">Features</a>
       <a href="#how-it-works">How it works</a>
       <a href="#privacy">Privacy</a>
+      <a href="#faq">FAQ</a>
+      <a href="#feedback">Feedback</a>
+      <a href="https://x.com/autonymapp">X</a>
+      <a href="https://ko-fi.com/autonymapp">Ko-fi</a>
       <a href="https://github.com/autonymapp/autonym" class="nav-cta">GitHub</a>
     </nav>
   </div>
@@ -38,13 +43,17 @@
 
   <section class="hero wrap">
     <div class="hero-copy">
-      <span class="eyebrow">Free &amp; open source · Windows</span>
+      <span class="eyebrow">Beta · Free &amp; open source · Windows</span>
       <h1>AI roleplay &amp; story-writing, <em>without the technical mess.</em></h1>
       <p class="lead">
         Autonym is a structured, compendium-first desktop app for solo roleplayers and authors.
         Build a Cast from labeled fields instead of prompt engineering. Pace scenes with Beat
         Sheets and Mood presets, and let dynamic Lorebooks keep your world consistent — all
         running on your own OpenRouter key.
+      </p>
+      <p class="beta-note">
+        Autonym is in active beta — the core experience is stable and used daily by its own
+        developer, but you may still hit rough edges. Bug reports and feedback are very welcome.
       </p>
       <div class="hero-actions">
         <a class="btn primary" href="https://github.com/autonymapp/autonym/releases/latest">
@@ -217,6 +226,100 @@
     </div>
   </section>
 
+  <section id="faq" class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Questions</span>
+      <h2>Frequently asked questions.</h2>
+    </div>
+
+    <div class="faq-list">
+      <details class="faq-item">
+        <summary>Is Autonym really free and open-source?</summary>
+        <p>Yes. Autonym is 100% free and MIT-licensed. There are no paywalled features, subscription tiers, or hidden charges built into the app.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Is Autonym in beta? What does that mean for me?</summary>
+        <p>Yes — Autonym is in active beta. The core experience is stable and used daily by its own developer, but you may still run into rough edges as it's used across different setups, models, and workflows. Bug reports and feature requests via GitHub Issues genuinely shape what gets fixed next.</p>
+      </details>
+      <details class="faq-item">
+        <summary>How does billing work if there's no subscription?</summary>
+        <p>You bring your own OpenRouter API key. Instead of paying Autonym a monthly fee, you pay OpenRouter directly, only for the exact text tokens you use — typically just a few cents per massive roleplay response.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Where is my data and API key stored?</summary>
+        <p>Everything stays entirely on your machine. Your OpenRouter API key is encrypted at rest using OS-level secure credential storage, and your chat logs and lorebooks never leave your local file system.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Is my roleplay content private?</summary>
+        <p>Yes. Nothing you write is seen by Autonym's developer or sent anywhere except the OpenRouter endpoint and model you've chosen, to generate a reply — governed by OpenRouter's and that model provider's own privacy terms, not Autonym's.</p>
+      </details>
+      <details class="faq-item">
+        <summary>What models work best with Autonym?</summary>
+        <p>Autonym features built-in presets for current-gen frontier models and community favorites like Claude, Magnum, and Euryale over OpenRouter. The app filters the catalog so dead or incompatible models don't clutter your workflow — or you can enter any OpenRouter model ID manually.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Does it support prompt caching?</summary>
+        <p>Yes. For supported models like Claude, automatic prompt caching keeps lore-heavy, long-running roleplay sessions fast and cheap by avoiding redundant token processing.</p>
+      </details>
+      <details class="faq-item">
+        <summary>What operating systems are supported?</summary>
+        <p>Autonym is built as a native desktop application, currently packaged for Windows only while in beta. macOS and Linux builds are being considered based on demand — let us know if you'd use one.</p>
+      </details>
+      <details class="faq-item">
+        <summary>How can I support the project?</summary>
+        <p>Autonym is free with no ads or paywalls, so any support is entirely optional and doesn't unlock anything extra. If you'd like to chip in, you can do so on <a href="https://ko-fi.com/autonymapp">Ko-fi</a> — otherwise, starring the repo or just using it and reporting bugs helps just as much.</p>
+      </details>
+      <details class="faq-item">
+        <summary>How do I report a bug or request a feature?</summary>
+        <p>Open an issue on <a href="https://github.com/autonymapp/autonym/issues">GitHub</a> — that's the best and fastest way to reach the developer directly, especially during beta. For softer, less formal thoughts, use the <a href="#feedback">feedback form</a> below instead.</p>
+      </details>
+      <details class="faq-item">
+        <summary>What's the difference between a GitHub Issue and the feedback form?</summary>
+        <p>A GitHub Issue is for something concrete and trackable — a bug with steps to reproduce, or a specific feature request — and it's public. The <a href="#feedback">feedback form</a> is for anything looser: general impressions, "I wish X worked differently," or just letting us know what's working. No GitHub account needed, and it's not public.</p>
+      </details>
+    </div>
+  </section>
+
+  <section id="feedback" class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Tell us what you think</span>
+      <h2>Got general feedback?</h2>
+      <p>
+        For bugs and specific feature requests, <a href="https://github.com/autonymapp/autonym/issues">open a GitHub issue</a> instead —
+        this is for everything else: first impressions, rough edges, or things you wish worked differently.
+      </p>
+    </div>
+
+    <form id="feedback-form" class="feedback-form" action="https://formspree.io/f/xgaejywa" method="POST">
+      <input type="hidden" name="_subject" value="Autonym feedback" />
+      <input type="text" name="_gotcha" class="feedback-honeypot" tabindex="-1" autocomplete="off" aria-hidden="true" />
+
+      <label>
+        <span>What kind of feedback is this?</span>
+        <select name="type">
+          <option value="General feedback">General feedback</option>
+          <option value="Feature idea">Feature idea</option>
+          <option value="Something confusing">Something was confusing</option>
+          <option value="Compliment">Compliment</option>
+          <option value="Other">Other</option>
+        </select>
+      </label>
+
+      <label>
+        <span>Your feedback</span>
+        <textarea name="message" rows="5" required placeholder="What's on your mind?"></textarea>
+      </label>
+
+      <label>
+        <span>Email <em>(optional — only if you're open to being asked a follow-up question)</em></span>
+        <input type="email" name="email" placeholder="you@example.com" />
+      </label>
+
+      <button type="submit" class="btn primary">Send feedback</button>
+      <p class="feedback-status" role="status" aria-live="polite"></p>
+    </form>
+  </section>
+
   <section class="wrap">
     <div class="cta-band">
       <div>
@@ -244,11 +347,57 @@
         <a href="https://github.com/autonymapp/autonym/releases">Releases</a>
         <a href="https://github.com/autonymapp/autonym/issues">Issues</a>
         <a href="https://github.com/autonymapp/autonym/blob/main/LICENSE">License</a>
+        <a href="#feedback">Feedback</a>
+        <a href="https://x.com/autonymapp">X / Twitter</a>
+        <a href="https://ko-fi.com/autonymapp">Ko-fi</a>
       </div>
     </div>
-    <p class="footer-note">Autonym is an independent open-source project and isn't affiliated with OpenRouter or any model provider. © 2026 autonymapp — MIT licensed.</p>
+    <p class="footer-note">Autonym is currently in beta. It's an independent open-source project and isn't affiliated with OpenRouter or any model provider. © 2026 autonymapp — MIT licensed.</p>
   </div>
 </footer>
+
+<script>
+  // Progressive enhancement: submit via fetch so we can show an inline confirmation instead of
+  // navigating to Formspree's own thank-you page. Falls back to a normal form POST if this
+  // script fails to run at all — the form works either way.
+  (function () {
+    var form = document.getElementById('feedback-form');
+    if (!form) return;
+    var status = form.querySelector('.feedback-status');
+    var submitButton = form.querySelector('button[type="submit"]');
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      status.textContent = '';
+      status.className = 'feedback-status';
+      submitButton.disabled = true;
+      submitButton.textContent = 'Sending…';
+
+      fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: { Accept: 'application/json' }
+      })
+        .then(function (response) {
+          if (response.ok) {
+            form.reset();
+            status.textContent = "Thanks — that's been sent.";
+            status.className = 'feedback-status success';
+          } else {
+            throw new Error('Formspree returned an error');
+          }
+        })
+        .catch(function () {
+          status.textContent = 'Something went wrong sending that. Please try again in a moment, or reach us on X instead.';
+          status.className = 'feedback-status error';
+        })
+        .finally(function () {
+          submitButton.disabled = false;
+          submitButton.textContent = 'Send feedback';
+        });
+    });
+  })();
+</script>
 
 </body>
 </html>

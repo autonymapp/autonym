@@ -124,6 +124,19 @@ header.site {
   letter-spacing: 0.01em;
 }
 
+.brand .beta-pill {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+  background: rgba(199, 146, 234, 0.14);
+  border: 1px solid rgba(199, 146, 234, 0.35);
+  border-radius: 999px;
+  padding: 3px 9px;
+}
+
 .nav-links {
   display: flex;
   align-items: center;
@@ -225,6 +238,16 @@ header.site {
   color: var(--text-dim);
   max-width: 46ch;
   margin-bottom: 32px;
+}
+
+.beta-note {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-faint);
+  max-width: 46ch;
+  padding-left: 14px;
+  border-left: 2px solid rgba(199, 146, 234, 0.4);
+  margin-bottom: 28px;
 }
 
 .hero-actions {
@@ -584,6 +607,137 @@ section {
 .strip .item p {
   font-size: 13.5px;
   color: var(--text-dim);
+}
+
+/* ---------- FAQ ---------- */
+
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 74ch;
+}
+
+.faq-item {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  padding: 4px 20px;
+}
+
+.faq-item[open] {
+  border-color: var(--border-strong);
+}
+
+.faq-item summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 16px 28px 16px 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 15.5px;
+  color: var(--text);
+  position: relative;
+}
+
+.faq-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq-item summary::after {
+  content: '+';
+  position: absolute;
+  right: 0;
+  top: 14px;
+  font-family: var(--font-body);
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--accent-1);
+  transition: transform 0.15s ease;
+}
+
+.faq-item[open] summary::after {
+  transform: rotate(45deg);
+}
+
+.faq-item p {
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--text-dim);
+  padding-bottom: 18px;
+}
+
+.faq-item p a {
+  color: var(--accent-1);
+}
+
+/* ---------- feedback form ---------- */
+
+.feedback-form {
+  max-width: 56ch;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.feedback-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.feedback-form label em {
+  font-style: normal;
+  font-weight: 400;
+  color: var(--text-faint);
+}
+
+.feedback-form select,
+.feedback-form textarea,
+.feedback-form input[type='email'] {
+  font-family: var(--font-body);
+  font-size: 14.5px;
+  color: var(--text);
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 11px 14px;
+  resize: vertical;
+}
+
+.feedback-form select:focus,
+.feedback-form textarea:focus,
+.feedback-form input[type='email']:focus {
+  outline: none;
+  border-color: var(--accent-1);
+}
+
+.feedback-form button {
+  align-self: flex-start;
+}
+
+.feedback-honeypot {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.feedback-status {
+  font-size: 13.5px;
+  min-height: 1.4em;
+}
+
+.feedback-status.success {
+  color: var(--accent-1);
+}
+
+.feedback-status.error {
+  color: #f0637a;
 }
 
 /* ---------- CTA band ---------- */
