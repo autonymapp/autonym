@@ -1,4 +1,4 @@
-appId: com.local.autonym
+appId: com.autonymapp.autonym
 productName: Autonym
 publish:
   provider: github

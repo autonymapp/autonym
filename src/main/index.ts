@@ -123,7 +123,7 @@ function setUpAutoUpdate(): void {
 pinUserDataDir()
 
 app.whenReady().then(() => {
-  electronApp.setAppUserModelId('com.local.autonym')
+  electronApp.setAppUserModelId('com.autonymapp.autonym')
 
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)

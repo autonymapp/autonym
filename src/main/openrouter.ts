@@ -138,7 +138,7 @@ export async function streamChatCompletion(
     headers: {
       Authorization: `Bearer ${key}`,
       'Content-Type': 'application/json',
-      'HTTP-Referer': 'https://github.com/local/autonym',
+      'HTTP-Referer': 'https://autonym.app',
       'X-Title': 'Autonym'
     },
     body: JSON.stringify({
