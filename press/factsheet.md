@@ -5,7 +5,7 @@
 **Platform:** Windows (Electron / TypeScript)
 **Backend:** OpenRouter integration (bring your own key, pay-per-message)
 **License:** MIT — free and open-source
-**Availability:** _[fill in — e.g. "Public preview" / "v0.1.0 on GitHub Releases" — not claiming a status you haven't decided on yet]_
+**Availability:** Public preview
 
 ## Core Pitch
 
@@ -37,8 +37,4 @@ pricing with prompt caching on supported models.
 
 - **Website:** https://autonym.app
 - **GitHub:** https://github.com/autonymapp/autonym
-- **X:** _[fill in once you've checked whether @autonymapp is available/claimed there too — GitHub and X are separate namespaces, so it's not guaranteed to match]_
-
----
-*Note: two fields above are left as placeholders rather than guessed — fill in Availability and the
-X handle once decided.*
+- **X:** [@autonymapp](https://x.com/autonymapp)
