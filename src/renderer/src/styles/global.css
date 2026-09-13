@@ -5,6 +5,13 @@
   font-style: normal;
 }
 
+@font-face {
+  font-family: 'Manrope';
+  src: url('../assets/fonts/Manrope.woff2') format('woff2-variations');
+  font-weight: 200 800;
+  font-style: normal;
+}
+
 :root {
   color-scheme: dark;
   --bg: #14151a;
@@ -15,11 +22,11 @@
   --border-soft: #23262f;
   --text: #edeef2;
   --text-dim: #9198a6;
-  --text-faint: #666d7a;
+  --text-faint: #838a98;
   --accent: #8b93ff;
   --accent-hover: #7a82f5;
   --accent-soft: rgba(139, 147, 255, 0.14);
-  --accent-contrast: #ffffff;
+  --accent-contrast: var(--bg);
   --accent-2: #c792ea;
   --danger: #f0637a;
   --danger-soft: rgba(240, 99, 122, 0.14);
@@ -34,8 +41,8 @@
   --chat-font-size: 15px;
   --chat-line-height: 1.6;
   font-family:
-    'Segoe UI', -apple-system, Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji',
-    'Segoe UI Emoji';
+    'Manrope', 'Segoe UI', -apple-system, Roboto, Helvetica, Arial, sans-serif,
+    'Apple Color Emoji', 'Segoe UI Emoji';
 }
 
 /* ---------- Accessibility overrides ---------- */
@@ -78,7 +85,7 @@ html[data-theme='slate'] {
   --border-soft: #212730;
   --text: #e7ecf2;
   --text-dim: #8f9bab;
-  --text-faint: #5f6b7a;
+  --text-faint: #7d8998;
   --accent: #5b9dff;
   --accent-hover: #4a8ce8;
   --accent-soft: rgba(91, 157, 255, 0.14);
@@ -97,7 +104,7 @@ html[data-theme='amber'] {
   --border-soft: #282220;
   --text: #f0e9e2;
   --text-dim: #a89b8d;
-  --text-faint: #75695d;
+  --text-faint: #93877b;
   --accent: #e0a34a;
   --accent-hover: #d0923b;
   --accent-soft: rgba(224, 163, 74, 0.16);
@@ -116,7 +123,7 @@ html[data-theme='oled'] {
   --border-soft: #181b20;
   --text: #e6f1ef;
   --text-dim: #8a9a97;
-  --text-faint: #5a6663;
+  --text-faint: #788481;
   --accent: #2dd4bf;
   --accent-hover: #22bfab;
   --accent-soft: rgba(45, 212, 191, 0.14);
@@ -135,7 +142,7 @@ html[data-theme='rose'] {
   --border-soft: #281f2c;
   --text: #f0e8f2;
   --text-dim: #a394ab;
-  --text-faint: #6f6277;
+  --text-faint: #8d8095;
   --accent: #e05c8a;
   --accent-hover: #d14b7a;
   --accent-soft: rgba(224, 92, 138, 0.15);
@@ -160,6 +167,7 @@ body {
   background: var(--bg);
   color: var(--text);
   font-size: 14px;
+  font-weight: 500;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
@@ -382,27 +390,31 @@ textarea {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 9px 10px;
+  padding: 9px 10px 9px 8px;
   border-radius: var(--radius-sm);
+  border-left: 2px solid transparent;
   cursor: pointer;
   font-size: 13px;
   color: var(--text-dim);
-  transition: background var(--ease), color var(--ease);
+  transition: background var(--ease), color var(--ease), border-color var(--ease);
 }
 .sidebar-item:hover {
-  background: var(--bg-hover);
-  color: var(--text);
-}
-.sidebar-item.active {
   background: var(--accent-soft);
   color: var(--text);
 }
+.sidebar-item.active {
+  background: var(--bg-hover);
+  border-left-color: var(--accent);
+  color: var(--text);
+  font-weight: 600;
+}
 .sidebar-item .row-delete {
-  opacity: 0;
+  opacity: 0.45;
   transition: opacity var(--ease);
   flex-shrink: 0;
 }
-.sidebar-item:hover .row-delete {
+.sidebar-item:hover .row-delete,
+.sidebar-item:focus-within .row-delete {
   opacity: 1;
 }
 

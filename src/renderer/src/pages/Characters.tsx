@@ -424,11 +424,9 @@ export default function CharactersPage(): JSX.Element {
 
       {showTrash ? (
         trashedCharacters.length === 0 ? (
-          <div className="empty-state" style={{ marginTop: 40 }}>
-            Trash is empty.
-          </div>
+          <div className="empty-state">Trash is empty.</div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 20, maxWidth: 640 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 640 }}>
             {trashedCharacters.map((c) => (
               <div key={c.id} className="card" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <Avatar avatarType={c.avatarType} src={c.avatarPath} emoji={c.avatarEmoji} name={c.name} size={36} />
@@ -489,13 +487,9 @@ export default function CharactersPage(): JSX.Element {
             </div>
           )}
           {characters.length === 0 ? (
-        <div className="empty-state" style={{ marginTop: 40 }}>
-          No cast members yet. Create one, or import a character file to get started.
-        </div>
+        <div className="empty-state">No cast members yet. Create one, or import a character file to get started.</div>
       ) : visibleCharacters.length === 0 ? (
-        <div className="empty-state" style={{ marginTop: 40 }}>
-          No characters match this filter.
-        </div>
+        <div className="empty-state">No characters match this filter.</div>
       ) : (
         <div
           style={{

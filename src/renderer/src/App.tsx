@@ -108,12 +108,20 @@ export default function App(): JSX.Element {
             display: 'flex',
             alignItems: 'center',
             justifyContent: navCollapsed ? 'center' : 'flex-start',
-            gap: 8,
-            letterSpacing: '-0.02em'
+            gap: 8
           }}
         >
           <AutonymMark size={26} />
-          {!navCollapsed && 'Autonym'}
+          {!navCollapsed && (
+            <span
+              style={{
+                fontFamily: "'Fredoka', 'Century Gothic', 'Poppins', 'Segoe UI', sans-serif",
+                letterSpacing: '0.01em'
+              }}
+            >
+              autonym
+            </span>
+          )}
         </div>
         {NAV_ITEMS.map((item) => (
           <NavButton

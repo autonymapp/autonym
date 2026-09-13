@@ -115,9 +115,9 @@ export default function HomePage(): JSX.Element {
 
       <div className="section-title">Recent Acts</div>
       {recentActs.length === 0 ? (
-        <p className="hint" style={{ marginBottom: 24 }}>
+        <div className="empty-state" style={{ marginBottom: 24 }}>
           No acts yet — pick a cast member below to start one.
-        </p>
+        </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 10, marginBottom: 24 }}>
           {recentActs.map((chat) => {
@@ -157,7 +157,7 @@ export default function HomePage(): JSX.Element {
 
       <div className="section-title">Cast</div>
       {characters.length === 0 ? (
-        <p className="hint">No cast members yet — create one on the Cast page.</p>
+        <div className="empty-state">No cast members yet — create one on the Cast page.</div>
       ) : (
         <div
           style={{

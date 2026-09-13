@@ -260,7 +260,7 @@ export default function UniversesPage(): JSX.Element {
         </div>
       )}
 
-      <div style={{ flex: 1, padding: 24, overflowY: 'auto' }}>
+      <div style={{ flex: 1, padding: '24px 28px', overflowY: 'auto' }}>
         {showTrash ? (
           trashed.length === 0 ? (
             <div className="empty-state">Trash is empty.</div>
