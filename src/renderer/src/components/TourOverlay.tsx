@@ -22,7 +22,7 @@ const TOUR_STEPS: TourStep[] = [
     page: null,
     selector: null,
     title: "🦊Hi, it's Nym ✒️",
-    body: "Welcome to Autonym — if you're here, it's because you want to think less about figuring out prompts and more about your lore. As its observing director, I'll show you how everything works here in The Between (you can skip anytime, of course)."
+    body: "Welcome to Autonym — if you're here, it's because you want to think less about figuring out prompts and more about your lore. As its resident observer, I'll show you how everything works here in The Between (you can skip anytime, of course)."
   },
 
   // Home

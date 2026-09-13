@@ -25,17 +25,22 @@ for (const size of [512, 1024]) {
   writeFileSync(join(outDir, `icon-${size}.png`), resvg.render().asPng())
 }
 
-// Standalone wordmark — plain "Autonym" set in Fredoka Bold, transparent background, in both
-// a dark-text (for light backgrounds) and white-text (for dark backgrounds) variant.
-function wordmarkSvg(color) {
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="700" height="200" viewBox="0 0 700 200">
+// Standalone wordmark — "Autonym" plus the same quiet trailing dot the sidebar lockup uses,
+// set in Fredoka Bold, transparent background, in both a dark-text (for light backgrounds) and
+// white-text (for dark backgrounds) variant.
+function wordmarkSvg(color, dotColor) {
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="760" height="200" viewBox="0 0 760 200">
   <text x="16" y="148" font-family="'Fredoka'" font-weight="700" font-size="130" fill="${color}">Autonym</text>
+  <circle cx="730" cy="140" r="9" fill="${dotColor}" />
 </svg>`
 }
 
-const variants = { dark: '#14151a', white: '#ffffff' }
-for (const [name, color] of Object.entries(variants)) {
-  const resvg = new Resvg(wordmarkSvg(color), {
+const variants = {
+  dark: { text: '#14151a', dot: '#6b7280' },
+  white: { text: '#ffffff', dot: '#9aa0ad' }
+}
+for (const [name, { text, dot }] of Object.entries(variants)) {
+  const resvg = new Resvg(wordmarkSvg(text, dot), {
     fitTo: { mode: 'width', value: 1800 },
     font: { fontFiles: [fontPath], loadSystemFonts: false, defaultFontFamily: 'Fredoka' }
   })

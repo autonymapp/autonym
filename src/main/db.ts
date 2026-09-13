@@ -278,7 +278,7 @@ function seedTutorialContent(): void {
     name: 'Nym',
     avatarType: 'emoji' as AvatarType,
     avatarPath: null,
-    avatarEmoji: '🦊',
+    avatarEmoji: '🛰️',
     universeId: universe.id,
     baseCharacterId: null,
     isWorldbuildingAssistant: false,
@@ -344,6 +344,113 @@ function seedTutorialContent(): void {
     role: 'assistant',
     content:
       '((No worries at all — that\'s exactly what this Act is for. Formatting\'s looking perfect, by the way.))\n\n*ears flick, pleased* "Told you it\'s quiet out here." ~Though I don\'t mind it, most days.~ "Go ahead and try it for real whenever you\'re ready — I\'ll be right here."'
+  })
+
+  // Two more lightweight cast members plus a short Act each, purely so Home/Cast/Universes
+  // don't look sparse on a fresh install — no lore attached, just enough of a sheet and one
+  // opening message each to look like real, in-progress entries.
+  const secondUniverse = universeRepo.create({
+    name: 'Thornwood',
+    description: 'An overgrown gothic manor with a bad habit of rearranging its own hallways after dark.'
+  })
+
+  const wren = characterRepo.create({
+    name: 'Wren',
+    avatarType: 'monogram' as AvatarType,
+    avatarPath: null,
+    avatarEmoji: null,
+    universeId: null,
+    baseCharacterId: null,
+    isWorldbuildingAssistant: false,
+    tags: [],
+    appearance: 'Wind-chapped and salt-faded, always in the same oilskin coat, several sizes too big.',
+    personality:
+      "Keeps to herself out of habit more than dislike — years alone at the lighthouse will do that. Warms up slowly, but pays close attention once she does.",
+    speechStyle: 'Short sentences, long pauses. Says more with what she doesn\'t say.',
+    background: 'Tends the last manned lighthouse on a coast that used to have a dozen. Something out past the light took the other eleven keepers.',
+    relationships: '',
+    scenario: '',
+    firstMessage:
+      '*doesn\'t look over right away — watches the water a beat longer, like she\'s finishing a thought* "Didn\'t figure anyone\'d come up the path tonight." *finally turns* "Storm\'s not due till the light dies. You\'ve got a few hours yet, if you\'re staying."',
+    notes: ''
+  })
+
+  const dorian = characterRepo.create({
+    name: 'Dorian Vance',
+    avatarType: 'monogram' as AvatarType,
+    avatarPath: null,
+    avatarEmoji: null,
+    universeId: secondUniverse.id,
+    baseCharacterId: null,
+    isWorldbuildingAssistant: false,
+    tags: [],
+    appearance: 'Sharp-dressed for a house with no other guests. Never seems to be standing in the light.',
+    personality:
+      'Courteous to a fault, and unnervingly good at steering a conversation exactly where he wants it. Amused by very little except getting his way.',
+    speechStyle: 'Formal, unhurried, faintly theatrical — like every sentence was rehearsed for an audience of one.',
+    background: 'Master of Thornwood, by a claim nobody currently alive can actually verify.',
+    relationships: '',
+    scenario: '',
+    firstMessage:
+      '"You made better time than I expected." *inclines his head, the picture of hospitality* "Thornwood so rarely has guests who arrive on purpose. Do come in — I\'ll have someone see to the door. It doesn\'t always stay where you left it."',
+    notes: ''
+  })
+
+  const wrenChat = chatRepo.create({
+    characterId: wren.id,
+    personaId: null,
+    impersonatingCharacterId: null,
+    scenarioId: null,
+    scenarioMilestoneIndex: 0,
+    priorSummary: null,
+    storylineId: null,
+    collaborativeMode: false,
+    tags: [],
+    directorsNotes: '',
+    inFictionDate: null,
+    groupCharacterIds: [],
+    universeId: null,
+    isSkit: false,
+    skitLength: null,
+    moodPreset: null,
+    contentIntensity: 'standard',
+    title: 'Fog Off the Point',
+    modelId: preset.modelId,
+    rpMode: 'narrative' as RpMode,
+    samplerSettings: preset.samplerSettings
+  })
+  messageRepo.create({ chatId: wrenChat.id, role: 'assistant', content: wren.firstMessage })
+
+  const dorianChat = chatRepo.create({
+    characterId: dorian.id,
+    personaId: null,
+    impersonatingCharacterId: null,
+    scenarioId: null,
+    scenarioMilestoneIndex: 0,
+    priorSummary: null,
+    storylineId: null,
+    collaborativeMode: false,
+    tags: [],
+    directorsNotes: '',
+    inFictionDate: null,
+    groupCharacterIds: [],
+    universeId: secondUniverse.id,
+    isSkit: false,
+    skitLength: null,
+    moodPreset: null,
+    contentIntensity: 'standard',
+    title: 'An Invitation to Thornwood',
+    modelId: preset.modelId,
+    rpMode: 'narrative' as RpMode,
+    samplerSettings: preset.samplerSettings
+  })
+  messageRepo.create({ chatId: dorianChat.id, role: 'assistant', content: dorian.firstMessage })
+
+  // A demo Persona so the Settings > Personas section (previously unreachable from the UI at
+  // all) doesn't ship looking empty either.
+  personaRepo.create({
+    name: 'A Wanderer',
+    description: 'Doesn\'t say much about where they came from. Tends to end up wherever a story is about to start.'
   })
 }
 

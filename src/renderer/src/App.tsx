@@ -129,7 +129,7 @@ export default function App(): JSX.Element {
                 letterSpacing: '0.01em'
               }}
             >
-              autonym
+              autonym<span style={{ color: 'var(--text-faint)' }}>.</span>
             </span>
           )}
         </div>
@@ -145,6 +145,7 @@ export default function App(): JSX.Element {
           />
         ))}
         <div style={{ flex: 1 }} />
+        <div className="threshold-divider" />
         <button
           className="nav-link"
           onClick={toggleNav}

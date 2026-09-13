@@ -14,20 +14,24 @@
 
 :root {
   color-scheme: dark;
-  --bg: #14151a;
-  --bg-elevated: #1c1e25;
-  --bg-hover: #262a34;
-  --bg-sunken: #101116;
-  --border: #2c303a;
-  --border-soft: #23262f;
-  --text: #edeef2;
-  --text-dim: #9198a6;
-  --text-faint: #838a98;
-  --accent: #8b93ff;
-  --accent-hover: #7a82f5;
-  --accent-soft: rgba(139, 147, 255, 0.14);
+  /* The default theme — a deep-space palette: near-black with a violet undertone, a
+     signal-violet accent, and a cyan secondary (avatars, thought-text, badges) — distinct
+     enough from the accent to read as a real second color, not just "more purple", while
+     still landing as a classic violet/cyan nebula pairing. */
+  --bg: #0b0a13;
+  --bg-elevated: #14121f;
+  --bg-hover: #1d1a2e;
+  --bg-sunken: #08070f;
+  --border: #2a2740;
+  --border-soft: #201d33;
+  --text: #eae7f6;
+  --text-dim: #b3aecb;
+  --text-faint: #8d87a8;
+  --accent: #9b93ff;
+  --accent-hover: #8078e8;
+  --accent-soft: rgba(155, 147, 255, 0.14);
   --accent-contrast: var(--bg);
-  --accent-2: #c792ea;
+  --accent-2: #3ec9e0;
   --danger: #f0637a;
   --danger-soft: rgba(240, 99, 122, 0.14);
   --success: #4fd1a5;
@@ -612,6 +616,39 @@ details[open] > summary .details-chevron {
   font-size: 13px;
   text-align: center;
   padding: 40px 16px;
+}
+.empty-state::before {
+  content: '';
+  display: block;
+  width: 34px;
+  height: 34px;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background:
+    radial-gradient(circle at center, var(--accent) 0 3px, transparent 3.5px),
+    radial-gradient(circle at center, var(--accent-soft) 4px 13px, transparent 13.5px);
+}
+
+/* A recurring accent: a line with a lit point at its center, standing in for the "threshold"
+   motif wherever two areas of the app meet — first used as a quiet sidebar divider. */
+.threshold-divider {
+  position: relative;
+  height: 1px;
+  margin: 12px 4px;
+  background: linear-gradient(90deg, transparent, var(--border) 20%, var(--border) 80%, transparent);
+}
+.threshold-divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px 2px var(--accent-soft);
 }
 
 .top-bar {

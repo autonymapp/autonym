@@ -1,5 +1,19 @@
 import { useEffect, useRef, useState } from 'react'
-import { AlertTriangle, Archive, BookOpen, Copy, FileText, Info, Save, Wand2 } from 'lucide-react'
+import {
+  AlertTriangle,
+  Archive,
+  BookOpen,
+  Clapperboard,
+  Cloud,
+  Copy,
+  FileText,
+  Info,
+  MessageSquareOff,
+  Quote,
+  Save,
+  Wand2
+} from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import type { Chat, ChatMessage, Character, LoreEntry, OpenRouterModel } from '@shared/types'
 import { formatChatAsStory } from '@shared/exportStory'
 import { estimateCost, formatCost } from '@shared/costEstimate'
@@ -8,12 +22,13 @@ import { useConfirm } from './ConfirmDialog'
 import MessageBubble from './MessageBubble'
 import AutoGrowTextarea from './AutoGrowTextarea'
 
-const FORMAT_BUTTONS: { label: string; prefix: string; suffix: string; title: string }[] = [
-  { label: '💬 Dialogue', prefix: '"', suffix: '"', title: 'Wrap as spoken dialogue: "like this"' },
-  { label: '🎬 Action', prefix: '*', suffix: '*', title: 'Wrap as action/narration: *like this*' },
-  { label: '💭 Thought', prefix: '~', suffix: '~', title: 'Wrap as an internal thought: ~like this~' },
+const FORMAT_BUTTONS: { icon: LucideIcon; label: string; prefix: string; suffix: string; title: string }[] = [
+  { icon: Quote, label: 'Dialogue', prefix: '"', suffix: '"', title: 'Wrap as spoken dialogue: "like this"' },
+  { icon: Clapperboard, label: 'Action', prefix: '*', suffix: '*', title: 'Wrap as action/narration: *like this*' },
+  { icon: Cloud, label: 'Thought', prefix: '~', suffix: '~', title: 'Wrap as an internal thought: ~like this~' },
   {
-    label: '🛑 OOC',
+    icon: MessageSquareOff,
+    label: 'OOC',
     prefix: '((',
     suffix: '))',
     title: 'Wrap as an out-of-character note to the AI: ((like this)) — it will answer OOC too'
@@ -484,8 +499,9 @@ export default function ChatWindow({
               className="btn btn-sm"
               title={b.title}
               onClick={() => wrapSelection(b.prefix, b.suffix)}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}
             >
-              {b.label}
+              <b.icon size={13} /> {b.label}
             </button>
           ))}
           <span

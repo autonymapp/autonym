@@ -57,7 +57,8 @@ import {
   Users,
   Wrench,
   X,
-  Map as MapIcon
+  Map as MapIcon,
+  ScrollText
 } from 'lucide-react'
 
 type SettingsView = 'simple' | 'advanced'
@@ -1098,9 +1099,17 @@ export default function ChatPage(): JSX.Element {
                               }
                             }}
                             title="Click to rename"
-                            style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', cursor: 'pointer' }}
+                            style={{
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: 5
+                            }}
                           >
-                            📦 {s.name}
+                            <Package size={13} /> {s.name}
                           </span>
                           <span style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
                             <button
@@ -1220,38 +1229,46 @@ export default function ChatPage(): JSX.Element {
                     </span>
                   )}
                   <div style={{ display: 'flex', gap: 6, marginTop: 4, alignItems: 'center', flexWrap: 'wrap' }}>
-                    <span className="pill" style={{ background: 'var(--bg-hover)', color: 'var(--text-dim)' }}>
-                      🎭 You: {impersonatingCharacter?.name ?? activePersona?.name ?? 'Yourself'}
+                    <span
+                      className="pill"
+                      style={{ background: 'var(--bg-hover)', color: 'var(--text-dim)', display: 'inline-flex', alignItems: 'center', gap: 4 }}
+                    >
+                      <UserCircle size={12} /> You: {impersonatingCharacter?.name ?? activePersona?.name ?? 'Yourself'}
                     </span>
                     <span style={{ color: 'var(--text-faint)', display: 'inline-flex' }}>
                       <ArrowLeftRight size={12} />
                     </span>
-                    <span className="pill">💬 Them: {activeCharacter.name}</span>
+                    <span className="pill" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                      <MessageCircle size={12} /> Them: {activeCharacter.name}
+                    </span>
                     <span className="pill" style={{ background: 'var(--bg-hover)', color: 'var(--text-dim)' }}>
                       {RP_MODE_LABELS[activeChat.rpMode]}
                     </span>
                     {attachedScenario && (
-                      <span className="pill" style={{ background: 'var(--bg-hover)', color: 'var(--text-dim)' }}>
-                        🗺️ {attachedScenario.name} ({activeChat.scenarioMilestoneIndex + 1}/
+                      <span
+                        className="pill"
+                        style={{ background: 'var(--bg-hover)', color: 'var(--text-dim)', display: 'inline-flex', alignItems: 'center', gap: 4 }}
+                      >
+                        <MapIcon size={12} /> {attachedScenario.name} ({activeChat.scenarioMilestoneIndex + 1}/
                         {attachedScenario.milestones.length})
                       </span>
                     )}
                     {activeChat.priorSummary && (
                       <span
                         className="pill"
-                        style={{ background: 'var(--bg-hover)', color: 'var(--text-dim)' }}
+                        style={{ background: 'var(--bg-hover)', color: 'var(--text-dim)', display: 'inline-flex', alignItems: 'center', gap: 4 }}
                         title={activeChat.priorSummary}
                       >
-                        📜 Continued story
+                        <ScrollText size={12} /> Continued story
                       </span>
                     )}
                     {activeChat.collaborativeMode && (
                       <span
                         className="pill"
-                        style={{ background: 'var(--bg-hover)', color: 'var(--text-dim)' }}
+                        style={{ background: 'var(--bg-hover)', color: 'var(--text-dim)', display: 'inline-flex', alignItems: 'center', gap: 4 }}
                         title="The AI is collaborating on setting/backstory here instead of assuming this character's usual canon"
                       >
-                        🧬 Collaborative
+                        <Users size={12} /> Collaborative
                       </span>
                     )}
                   </div>
@@ -1427,8 +1444,8 @@ export default function ChatPage(): JSX.Element {
                 }}
               >
                 <div className="panel" style={{ padding: 10, marginBottom: 14, background: 'var(--bg-sunken)' }}>
-                  <div style={{ fontSize: 12 }}>
-                    🎭 You're in a scene with <strong>{activeCharacter.name}</strong>
+                  <div style={{ fontSize: 12, display: 'flex', alignItems: 'center', gap: 5 }}>
+                    <UserCircle size={13} /> You're in a scene with <strong>{activeCharacter.name}</strong>
                   </div>
                 </div>
 
@@ -1850,7 +1867,9 @@ export default function ChatPage(): JSX.Element {
                     style={{ marginTop: 2 }}
                   />
                   <div>
-                    <div style={{ fontSize: 12, fontWeight: 700 }}>🧬 Collaborative Mode</div>
+                    <div style={{ fontSize: 12, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 5 }}>
+                      <Users size={13} /> Collaborative Mode
+                    </div>
                     <p className="hint" style={{ marginTop: 2 }}>
                       Brainstorm a story from scratch, or explore an AU for {activeCharacter.name} — the AI
                       keeps their personality but treats background/setting as open to develop together
