@@ -16,17 +16,26 @@ export default function CharacterTextImporter({
   const [structuring, setStructuring] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  async function fetchUrl(): Promise<void> {
+  /** Fetches the URL and organizes it into fields in one step — the scraping/stripping in
+   *  between is implementation detail the user doesn't need to review on the happy path.
+   *  Only on failure do we fall back to showing the raw fetched text for manual editing/retry. */
+  async function fetchAndStructureUrl(): Promise<void> {
     if (!url.trim()) return
     setFetching(true)
     setError(null)
     try {
       const text = await window.api.lore.fetchUrlText(url.trim())
       setRawText(text)
+      setFetching(false)
+      setStructuring(true)
+      const fields = await window.api.characters.structureText(text)
+      onApply(fields)
+      setOpen(false)
     } catch (err: any) {
       setError(friendlyError(err))
     } finally {
       setFetching(false)
+      setStructuring(false)
     }
   }
 
@@ -86,27 +95,31 @@ export default function CharacterTextImporter({
             placeholder="https://..."
             style={{ flex: 1 }}
           />
-          <button className="btn btn-sm" onClick={fetchUrl} disabled={fetching}>
-            {fetching ? 'Fetching…' : 'Fetch'}
+          <button className="btn btn-primary btn-sm" onClick={fetchAndStructureUrl} disabled={fetching || structuring}>
+            {fetching ? 'Fetching…' : structuring ? 'Organizing…' : '✨ Fetch & Organize'}
           </button>
         </div>
       )}
 
-      <label className="field">
-        <span className="label">{source === 'url' ? 'Fetched Text (Editable)' : 'Reference Text'}</span>
-        <textarea
-          rows={6}
-          value={rawText}
-          onChange={(e) => setRawText(e.target.value)}
-          placeholder="Paste text here..."
-        />
-      </label>
+      {(source === 'text' || rawText) && (
+        <label className="field">
+          <span className="label">{source === 'url' ? 'Fetched Text (Editable) — couldn\'t auto-organize, fix it up and retry below' : 'Reference Text'}</span>
+          <textarea
+            rows={6}
+            value={rawText}
+            onChange={(e) => setRawText(e.target.value)}
+            placeholder="Paste text here..."
+          />
+        </label>
+      )}
 
       {error && <p className="hint" style={{ color: 'var(--danger)' }}>{error}</p>}
 
-      <button className="btn btn-primary btn-sm" onClick={structure} disabled={structuring}>
-        {structuring ? 'Organizing…' : '✨ Organize Into Fields'}
-      </button>
+      {(source === 'text' || rawText) && (
+        <button className="btn btn-primary btn-sm" onClick={structure} disabled={structuring}>
+          {structuring ? 'Organizing…' : '✨ Organize Into Fields'}
+        </button>
+      )}
     </div>
   )
 }
