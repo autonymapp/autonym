@@ -38,3 +38,4 @@ pricing with prompt caching on supported models.
 - **Website:** https://autonym.app
 - **GitHub:** https://github.com/autonymapp/autonym
 - **X:** [@autonymapp](https://x.com/autonymapp)
+- **Press contact:** hello@autonym.app
