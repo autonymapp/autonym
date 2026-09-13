@@ -6,14 +6,20 @@ publish:
   repo: autonym
 directories:
   buildResources: build
+# Explicit allowlist instead of a denylist on top of electron-builder's "everything" default —
+# the old denylist was letting docs/, press/, scratch/, scripts/, README, tsconfigs, and even
+# .claude/settings.local.json ship inside the installed app.
 files:
-  - '!**/.vscode/*'
-  - '!src/*'
-  - '!electron.vite.config.{js,ts,mjs,cjs}'
-  - '!{.eslintrc.json,.eslintignore,.prettierrc,.prettierignore}'
+  - out/**/*
+  - package.json
+  - '!**/*.{md,map}'
 win:
   target: nsis
   executableName: Autonym
+# Chromium ships ~60 locale .pak files by default; the app has no localized UI yet, so keep only
+# the one Windows actually needs at runtime.
+electronLanguages:
+  - en-US
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
