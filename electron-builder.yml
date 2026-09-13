@@ -1,0 +1,22 @@
+appId: com.local.autonym
+productName: Autonym
+publish:
+  provider: github
+  owner: autonymapp
+  repo: autonym
+directories:
+  buildResources: build
+files:
+  - '!**/.vscode/*'
+  - '!src/*'
+  - '!electron.vite.config.{js,ts,mjs,cjs}'
+  - '!{.eslintrc.json,.eslintignore,.prettierrc,.prettierignore}'
+win:
+  target: nsis
+  executableName: Autonym
+nsis:
+  artifactName: ${name}-${version}-setup.${ext}
+  shortcutName: ${productName}
+  uninstallDisplayName: ${productName}
+  createDesktopShortcut: always
+npmRebuild: true

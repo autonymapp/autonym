@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Autonym — AI roleplay &amp; story-writing, structured</title>
+<meta name="description" content="Autonym is a desktop AI roleplay and story-writing app: structured Cast &amp; Lorebook authoring, Beat Sheets, Universes, Skits, and transparent per-message pricing over OpenRouter. Free, MIT-licensed, fully local." />
+<link rel="icon" type="image/png" href="assets/icon-512.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+
+<meta property="og:title" content="Autonym — AI roleplay &amp; story-writing, structured" />
+<meta property="og:description" content="A compendium-first desktop app for solo roleplayers and authors. Beat Sheets, Universes, Skits, and honest per-message pricing over OpenRouter." />
+<meta property="og:image" content="https://autonym.app/assets/icon-1024.png" />
+<meta property="og:url" content="https://autonym.app/" />
+<meta name="twitter:card" content="summary" />
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap nav">
+    <a class="brand" href="#top">
+      <img class="mark" src="assets/icon-512.png" alt="" />
+      <span>Autonym</span>
+    </a>
+    <nav class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#how-it-works">How it works</a>
+      <a href="#privacy">Privacy</a>
+      <a href="https://github.com/autonymapp/autonym" class="nav-cta">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+  <section class="hero wrap">
+    <div class="hero-copy">
+      <span class="eyebrow">Free &amp; open source · Windows</span>
+      <h1>AI roleplay &amp; story-writing, <em>without the technical mess.</em></h1>
+      <p class="lead">
+        Autonym is a structured, compendium-first desktop app for solo roleplayers and authors.
+        Build a Cast from labeled fields instead of prompt engineering, pace scenes with Beat
+        Sheets and Mood presets, and let dynamic Lorebooks keep your world consistent — all
+        running on your own OpenRouter key.
+      </p>
+      <div class="hero-actions">
+        <a class="btn primary" href="https://github.com/autonymapp/autonym/releases/latest">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13"/><path d="M7 11l5 5 5-5"/><path d="M5 21h14"/></svg>
+          Download for Windows
+        </a>
+        <a class="btn secondary" href="https://github.com/autonymapp/autonym">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg>
+          View source
+        </a>
+      </div>
+      <div class="hero-meta">
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 6.5 7 1-5.2 5 1.2 7-6-3.2-6 3.2 1.2-7L2 9.5l7-1z"/></svg> MIT licensed</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Your data stays on your machine</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Bring your own OpenRouter key</span>
+      </div>
+    </div>
+
+    <div class="mockup" aria-hidden="true">
+      <div class="mockup-titlebar">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <span class="label">Autonym — illustrative, not an actual screenshot</span>
+      </div>
+      <div class="mockup-body">
+        <div class="mockup-nav">
+          <div class="item">Cast</div>
+          <div class="item">Lorebooks</div>
+          <div class="item active">Chat</div>
+          <div class="item">Universes</div>
+          <div class="item">Skits</div>
+        </div>
+        <div class="mockup-chat">
+          <span class="mockup-tag">Mood: Slice of Life / Banter</span>
+          <div class="bubble">
+            <span class="who">Companion</span>
+            <em class="fmt-action">pads into the kitchen still half-asleep, hair a mess</em> <span class="fmt-dialogue">&ldquo;Please tell me there's coffee left.&rdquo;</span>
+          </div>
+          <div class="bubble me">
+            <span class="who">You</span>
+            <em class="fmt-action">slides a full mug across the counter</em> <span class="fmt-dialogue">&ldquo;Barely made it in time.&rdquo;</span> <span class="fmt-ooc">OOC: sorry for the slow start today, just settling in</span>
+          </div>
+          <div class="bubble">
+            <span class="who">Companion</span>
+            <em class="fmt-action">wraps both hands around the mug like it personally saved her life</em> <span class="fmt-dialogue">&ldquo;You're my favorite person right now.&rdquo;</span> <em class="fmt-thought">Also possibly the only person I trust before 9am.</em>
+          </div>
+        </div>
+      </div>
+      <div class="mockup-caption">Real RP syntax, rendered live.</div>
+    </div>
+  </section>
+
+  <section class="pitch">
+    <div class="wrap">
+      <p>
+        Instead of forcing you to master raw prompt engineering, Autonym paces scenes through
+        <strong>interactive Beat Sheets</strong> and a one-click <strong>Mood &amp; Pacing</strong>
+        selector, injects lore automatically through <strong>cue-word Lorebooks</strong>, and shows
+        <strong>transparent per-message pricing</strong> with prompt caching on supported models.
+      </p>
+    </div>
+  </section>
+
+  <section id="features" class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">What's inside</span>
+      <h2>Everything a long-form roleplay needs, none of the busywork.</h2>
+      <p>Eight systems that work together — from a first character sheet to a finished, exported story.</p>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
+        <h3>Beat Sheets &amp; Mood presets</h3>
+        <p>A drag-and-drop scene roadmap plus one-click steering — Slow Burn, High Action &amp; Grit, Cinematic &amp; Atmospheric, Slice of Life — that resists the model's urge to resolve tension too fast.</p>
+      </div>
+
+      <div class="card">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
+        <h3>Dynamic Lorebooks</h3>
+        <p>Cue-word-triggered world-info injection, with an AI-assisted "Fill from Wiki/Text" importer that recognizes Fandom wiki markup for one-paste entries.</p>
+      </div>
+
+      <div class="card">
+        <span class="badge">New</span>
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><circle cx="5" cy="6" r="2.2"/><circle cx="19" cy="6" r="2.2"/><circle cx="5" cy="18" r="2.2"/><circle cx="19" cy="18" r="2.2"/><path d="M9.5 10L6.6 7.4M14.5 10l2.9-2.6M9.5 14l-2.9 2.6M14.5 14l2.9 2.6"/></svg></div>
+        <h3>Universes &amp; linked variants</h3>
+        <p>Group your Cast by world or verse, then link a canon or AU take on a character to a base version that shares personality automatically — no duplicate sheets.</p>
+      </div>
+
+      <div class="card">
+        <span class="badge">New</span>
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4V2m0 20v-2M8 9h2m9-2 1.3-1.3a1 1 0 0 0 0-1.4L18.7 2.7a1 1 0 0 0-1.4 0L4.7 15.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0z"/><path d="M4 21l3-1 12-12"/></svg></div>
+        <h3>Skits</h3>
+        <p>Unattended short-story generation — pick a premise and a length, and the AI writes a complete short scene end to end. Ideal for ship fic without the typing.</p>
+      </div>
+
+      <div class="card">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/><circle cx="7" cy="6.5" r=".6" fill="currentColor" stroke="none"/><circle cx="10" cy="6.5" r=".6" fill="currentColor" stroke="none"/></svg></div>
+        <h3>Curated, RP-tuned models</h3>
+        <p>Built-in presets for current-gen Claude, Magnum, and Euryale, filtered against OpenRouter's live catalog so dead or unsuitable models never waste your time — with transparent per-message cost estimates.</p>
+      </div>
+
+      <div class="card">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h7l-1 8 10-12h-7z"/></svg></div>
+        <h3>Prompt caching</h3>
+        <p>Automatic prompt caching on supported Claude models keeps lore-heavy, long-running scenes fast and cheap.</p>
+      </div>
+
+      <div class="card">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><rect x="4" y="17" width="16" height="4" rx="1"/></svg></div>
+        <h3>Direct export</h3>
+        <p>Export a single Act or a whole combined Storyline straight to EPUB, PDF, or Markdown — for reading elsewhere or keeping an archive.</p>
+      </div>
+
+      <div class="card">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
+        <h3>Fully local, privacy-first</h3>
+        <p>Your data stays on your machine. Your OpenRouter key is encrypted at rest with OS-level encryption and never leaves the main process in plaintext.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="how-it-works" class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Getting started</span>
+      <h2>From a blank Cast to a finished scene.</h2>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <span class="num">01</span>
+        <h3>Build your Cast</h3>
+        <p>Fill in labeled fields — appearance, personality, speech style, background — or paste a wiki page and let Autonym structure it for you.</p>
+      </div>
+      <div class="step">
+        <span class="num">02</span>
+        <h3>Set the scene</h3>
+        <p>Pick a Universe, attach a Lorebook, choose a Mood &amp; Pacing preset and a Content Intensity level, and start an Act.</p>
+      </div>
+      <div class="step">
+        <span class="num">03</span>
+        <h3>Write, or let it write</h3>
+        <p>Reply turn by turn, co-write in Collaborative Mode, or hand it off entirely to a Skit and get a finished short scene back.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="privacy" class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">How it's built</span>
+      <h2>Your key, your machine, your story.</h2>
+    </div>
+    <div class="strip">
+      <div class="item">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <h4>Encrypted key storage</h4>
+        <p>Your OpenRouter API key is encrypted at rest via OS-level credential encryption and is only ever used from Electron's main process.</p>
+      </div>
+      <div class="item">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4v5c0 5-3.4 7.4-8 9-4.6-1.6-8-4-8-9V7z"/></svg>
+        <h4>No account, no telemetry</h4>
+        <p>There's no Autonym account and nothing phones home. You talk to OpenRouter directly, on the model of your choice, at the price it quotes.</p>
+      </div>
+      <div class="item">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 6.5 7 1-5.2 5 1.2 7-6-3.2-6 3.2 1.2-7L2 9.5l7-1z"/></svg>
+        <h4>MIT licensed</h4>
+        <p>Free, open-source, and yours to read, fork, or self-host. No paywalled features.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <div class="cta-band">
+      <div>
+        <h2>Ready to write?</h2>
+        <p>Grab the latest Windows build, or read the source and build it yourself.</p>
+      </div>
+      <div class="cta-actions">
+        <a class="btn primary" href="https://github.com/autonymapp/autonym/releases/latest">Download latest release</a>
+        <a class="btn secondary" href="https://github.com/autonymapp/autonym#readme">Read the docs</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <img src="assets/icon-512.png" alt="" />
+        <span>Autonym</span>
+      </div>
+      <div class="footer-links">
+        <a href="https://github.com/autonymapp/autonym">GitHub</a>
+        <a href="https://github.com/autonymapp/autonym/releases">Releases</a>
+        <a href="https://github.com/autonymapp/autonym/issues">Issues</a>
+        <a href="https://github.com/autonymapp/autonym/blob/main/LICENSE">License</a>
+      </div>
+    </div>
+    <p class="footer-note">Autonym is an independent open-source project and isn't affiliated with OpenRouter or any model provider. © 2026 autonymapp — MIT licensed.</p>
+  </div>
+</footer>
+
+</body>
+</html>
