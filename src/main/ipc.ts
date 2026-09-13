@@ -988,6 +988,52 @@ export function registerIpcHandlers(getWindow: () => BrowserWindow | null): void
     return text.trim()
   })
 
+  // Fold everything older than the last `keepLastN` messages into the chat's priorSummary, then
+  // flag those rows so assemblePrompt stops counting them against the context budget — same
+  // summarization approach as "Continue in New Chat", but in place rather than forking a new Act.
+  ipcMain.handle(
+    'chat:compactHistory',
+    async (_e, chatId: number, keepLastN: number): Promise<{ priorSummary: string; compactedCount: number }> => {
+      const context = buildChatContext(chatId)
+      const { chat } = context
+
+      const history = messageRepo.listByChat(chatId).filter((m) => !m.excludedFromContext)
+      const toCompact = history.slice(0, Math.max(history.length - keepLastN, 0))
+      if (toCompact.length === 0) throw new Error('Nothing old enough to compact yet.')
+
+      const { messages } = assemblePrompt({
+        ...context,
+        scenarioMilestoneIndex: chat.scenarioMilestoneIndex,
+        directorsNotes: chat.directorsNotes,
+        inFictionDate: chat.inFictionDate,
+        priorSummary: chat.priorSummary,
+        history: toCompact,
+        contextLength: chat.samplerSettings.contextLength,
+        rpMode: chat.rpMode,
+        collaborativeMode: chat.collaborativeMode,
+        moodPreset: chat.moodPreset,
+        contentIntensity: chat.contentIntensity
+      })
+
+      messages.push({
+        role: 'system',
+        content:
+          'Summarize this roleplay so far in 1-2 short paragraphs: key events, how the characters\' ' +
+          'relationship has developed, and the current situation. Write it as plain backstory notes for ' +
+          'continuing the story later — not as dialogue, not in character, no formatting markup.'
+      })
+
+      const summary = await getCompletion(CLERICAL_MODEL_ID, messages, {
+        ...CLERICAL_SAMPLER_OPTIONS,
+        maxTokens: 400
+      })
+      const priorSummary = summary.trim()
+      chatRepo.setPriorSummary(chatId, priorSummary)
+      messageRepo.markExcludedFromContext(chatId, toCompact[toCompact.length - 1].id)
+      return { priorSummary, compactedCount: toCompact.length }
+    }
+  )
+
   // Save arbitrary text (a story export) to a user-chosen file.
   ipcMain.handle(
     'chat:saveStoryFile',

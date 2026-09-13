@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { assemblePrompt, matchLoreEntries, estimateTokens } from './assemble'
-import type { Character, LoreEntry } from './types'
+import type { Character, ChatMessage, LoreEntry } from './types'
 
 function entry(overrides: Partial<LoreEntry>): LoreEntry {
   return {
@@ -151,5 +151,47 @@ describe('assemblePrompt — Group Scene cast depth', () => {
     const blank = character({ id: 2, name: 'Blank', personality: '', speechStyle: '', appearance: '', background: '' })
     const { messages } = assemblePrompt({ ...baseParams(), groupCharacters: [blank] })
     expect(messages[0].content).toContain('Blank')
+  })
+})
+
+function message(overrides: Partial<ChatMessage>): ChatMessage {
+  return {
+    id: 1,
+    chatId: 1,
+    role: 'user',
+    content: '',
+    variants: [],
+    activeVariantIndex: 0,
+    bookmarked: false,
+    createdAt: new Date().toISOString(),
+    speakerCharacterId: null,
+    matchedLoreEntryIds: [],
+    excludedFromContext: false,
+    ...overrides
+  }
+}
+
+describe('assemblePrompt — excludedFromContext (Compact Older Messages)', () => {
+  it('omits excluded messages from the sent history', () => {
+    const { messages } = assemblePrompt({
+      ...baseParams(),
+      history: [
+        message({ id: 1, role: 'user', content: 'old turn, compacted away', excludedFromContext: true }),
+        message({ id: 2, role: 'assistant', content: 'recent turn, still live', excludedFromContext: false })
+      ]
+    })
+    const contents = messages.map((m) => m.content)
+    expect(contents).not.toContain('old turn, compacted away')
+    expect(contents).toContain('recent turn, still live')
+  })
+
+  it('keeps every message when none are excluded', () => {
+    const { messages } = assemblePrompt({
+      ...baseParams(),
+      history: [message({ id: 1, content: 'turn one' }), message({ id: 2, content: 'turn two' })]
+    })
+    expect(messages.map((m) => m.content)).toEqual(
+      expect.arrayContaining(['turn one', 'turn two'])
+    )
   })
 })

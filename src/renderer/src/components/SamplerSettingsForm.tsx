@@ -2,10 +2,14 @@ import type { SamplerSettings } from '@shared/types'
 
 export default function SamplerSettingsForm({
   value,
-  onChange
+  onChange,
+  maxContextLength
 }: {
   value: SamplerSettings
   onChange: (settings: SamplerSettings) => void
+  /** The selected model's real context window, when known — caps the Scene Memory field so it
+   *  can't be set past what the model actually supports. */
+  maxContextLength?: number
 }): JSX.Element {
   function set<K extends keyof SamplerSettings>(key: K, val: SamplerSettings[K]): void {
     onChange({ ...value, [key]: val })
@@ -59,13 +63,19 @@ export default function SamplerSettingsForm({
         <input
           type="number"
           min={512}
-          max={200000}
+          max={maxContextLength ?? 200000}
           value={value.contextLength}
-          onChange={(e) => set('contextLength', parseInt(e.target.value) || 512)}
+          onChange={(e) =>
+            set(
+              'contextLength',
+              Math.min(parseInt(e.target.value) || 512, maxContextLength ?? 200000)
+            )
+          }
         />
         <span className="hint">
-          How much of the conversation the AI can recall at once. Higher remembers more, but costs
-          more per message.
+          {maxContextLength
+            ? `How much of the conversation the AI can recall at once. This model supports up to ${maxContextLength.toLocaleString()} tokens — switching models resets this to match.`
+            : 'How much of the conversation the AI can recall at once. Higher remembers more, but costs more per message.'}
         </span>
       </label>
 

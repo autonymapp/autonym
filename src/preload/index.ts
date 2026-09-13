@@ -223,6 +223,11 @@ const api = {
       ipcRenderer.invoke('chat:suggestReply', chatId),
     summarizeForContinuation: (chatId: number): Promise<string> =>
       ipcRenderer.invoke('chat:summarizeForContinuation', chatId),
+    compactHistory: (
+      chatId: number,
+      keepLastN: number
+    ): Promise<{ priorSummary: string; compactedCount: number }> =>
+      ipcRenderer.invoke('chat:compactHistory', chatId, keepLastN),
     saveStoryFile: (defaultFilename: string, content: string): Promise<boolean> =>
       ipcRenderer.invoke('chat:saveStoryFile', defaultFilename, content),
     exportPdf: (defaultFilename: string, title: string, storyBody: string): Promise<boolean> =>

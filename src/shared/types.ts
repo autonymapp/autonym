@@ -277,9 +277,13 @@ export interface ChatMessage {
   /** Lorebook entries actually injected into context when this (assistant) message was
    *  generated — lets the UI show which world-info actually fired for this specific reply. */
   matchedLoreEntryIds: number[]
+  /** True once this message has been folded into the chat's priorSummary by "Compact Older
+   *  Messages" — still shown in the transcript, but skipped by assemblePrompt's history so it no
+   *  longer counts against the context budget on future turns. */
+  excludedFromContext: boolean
 }
 
-/** variants/activeVariantIndex/bookmarked default sensibly in messageRepo.create when omitted. */
+/** variants/activeVariantIndex/bookmarked/excludedFromContext default sensibly in messageRepo.create when omitted. */
 export type ChatMessageInput = Omit<
   ChatMessage,
   | 'id'
@@ -289,6 +293,7 @@ export type ChatMessageInput = Omit<
   | 'bookmarked'
   | 'speakerCharacterId'
   | 'matchedLoreEntryIds'
+  | 'excludedFromContext'
 > &
   Partial<
     Pick<

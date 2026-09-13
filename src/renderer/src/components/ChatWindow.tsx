@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { BookOpen, Copy, FileText, Info, Save, Wand2 } from 'lucide-react'
+import { AlertTriangle, Archive, BookOpen, Copy, FileText, Info, Save, Wand2 } from 'lucide-react'
 import type { Chat, ChatMessage, Character, LoreEntry, OpenRouterModel } from '@shared/types'
 import { formatChatAsStory } from '@shared/exportStory'
 import { estimateCost, formatCost } from '@shared/costEstimate'
@@ -25,13 +25,17 @@ export default function ChatWindow({
   character,
   impersonatingCharacter,
   groupCharacters,
-  onForkFromMessage
+  onForkFromMessage,
+  onContinueInNewChat,
+  continuingInNewChat
 }: {
   chat: Chat
   character: Character
   impersonatingCharacter: Character | null
   groupCharacters: Character[]
   onForkFromMessage: (messageId: number) => void
+  onContinueInNewChat: () => void
+  continuingInNewChat: boolean
 }): JSX.Element {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState('')
@@ -48,6 +52,8 @@ export default function ChatWindow({
   const [synonymOptions, setSynonymOptions] = useState<string[] | null>(null)
   const [lookingUpSynonyms, setLookingUpSynonyms] = useState(false)
   const [remixing, setRemixing] = useState<'detailed' | 'concise' | null>(null)
+  const [wallNudgeDismissed, setWallNudgeDismissed] = useState(false)
+  const [compacting, setCompacting] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const confirm = useConfirm()
@@ -62,6 +68,7 @@ export default function ChatWindow({
 
   useEffect(() => {
     refresh()
+    setWallNudgeDismissed(false)
   }, [chat.id])
 
   useEffect(() => {
@@ -260,6 +267,27 @@ export default function ChatWindow({
     setMessages((prev) => prev.map((m) => (m.id === updated.id ? updated : m)))
   }
 
+  const COMPACT_KEEP_LAST_N = 20
+
+  async function compactOlderMessages(): Promise<void> {
+    const ok = await confirm(
+      `Summarize everything except the most recent ${COMPACT_KEEP_LAST_N} messages into this Act's ` +
+        "memory? The older messages stay visible in the transcript, but won't be sent to the AI anymore.",
+      { title: 'Compact Older Messages?', danger: false, confirmLabel: 'Compact' }
+    )
+    if (!ok) return
+    setCompacting(true)
+    setErrorText(null)
+    try {
+      await window.api.chat.compactHistory(chat.id, COMPACT_KEEP_LAST_N)
+      await refresh()
+    } catch (err) {
+      setErrorText(friendlyError(err))
+    } finally {
+      setCompacting(false)
+    }
+  }
+
   async function regenerate(messageId: number): Promise<void> {
     setErrorText(null)
     setBusyMessageId(messageId)
@@ -338,6 +366,7 @@ export default function ChatWindow({
         bookmarked: false,
         speakerCharacterId: null,
         matchedLoreEntryIds: [],
+        excludedFromContext: false,
         createdAt: new Date().toISOString()
       }
     ])
@@ -353,6 +382,11 @@ export default function ChatWindow({
   const currentModel = models.find((m) => m.id === chat.modelId)
   const contextChars = messages.reduce((sum, m) => sum + m.content.length, 0)
   const costEstimate = estimateCost(currentModel, contextChars + input.length, chat.samplerSettings.maxTokens)
+  // Rough char-per-token approximation (matches costEstimate.ts) — doesn't account for the
+  // system prompt's own size, so this reads a little low, but it's enough to warn before a
+  // long scene actually hits the wall and the model starts forgetting earlier turns.
+  const usedTokens = Math.ceil((contextChars + input.length) / 4)
+  const contextPercent = Math.min(100, Math.round((usedTokens / chat.samplerSettings.contextLength) * 100))
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -398,6 +432,14 @@ export default function ChatWindow({
           disabled={messages.length === 0}
         >
           <FileText size={14} /> EPUB
+        </button>
+        <button
+          className="btn btn-ghost btn-sm"
+          title="Summarize older messages into this Act's memory to free up context"
+          onClick={compactOlderMessages}
+          disabled={compacting || messages.length <= COMPACT_KEEP_LAST_N}
+        >
+          <Archive size={14} /> {compacting ? 'Compacting…' : 'Compact Older Messages'}
         </button>
       </div>
       <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', padding: '20px 24px' }}>
@@ -511,6 +553,39 @@ export default function ChatWindow({
             </button>
           </div>
         )}
+        {contextPercent >= 85 && !wallNudgeDismissed && (
+          <div
+            className="panel"
+            style={{
+              padding: '8px 10px',
+              marginBottom: 8,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              borderColor: 'var(--danger)'
+            }}
+          >
+            <AlertTriangle size={14} color="var(--danger)" style={{ flexShrink: 0 }} />
+            <span className="hint" style={{ flex: 1 }}>
+              This Act is getting close to its memory limit — earlier turns will start dropping out
+              of context soon.
+            </span>
+            <button
+              className="btn btn-sm"
+              onClick={onContinueInNewChat}
+              disabled={continuingInNewChat}
+            >
+              {continuingInNewChat ? 'Starting…' : 'Continue in New Chat'}
+            </button>
+            <button
+              className="msg-action-btn"
+              title="Dismiss"
+              onClick={() => setWallNudgeDismissed(true)}
+            >
+              ✕
+            </button>
+          </div>
+        )}
         <div style={{ display: 'flex', gap: 8 }}>
           <AutoGrowTextarea
             ref={textareaRef}
@@ -532,9 +607,23 @@ export default function ChatWindow({
             {sending ? 'Sending…' : 'Send'}
           </button>
         </div>
-        {costEstimate !== null && (
-          <div className="hint" style={{ marginTop: 6, textAlign: 'right' }}>
-            Estimated cost: {formatCost(costEstimate)}
+        {(costEstimate !== null || chat.samplerSettings.contextLength > 0) && (
+          <div
+            className="hint"
+            style={{ marginTop: 6, display: 'flex', justifyContent: 'space-between', gap: 12 }}
+          >
+            <span
+              title={`~${usedTokens.toLocaleString()} of ${chat.samplerSettings.contextLength.toLocaleString()} tokens used (rough estimate)`}
+              style={
+                contextPercent >= 90
+                  ? { color: 'var(--danger)', display: 'inline-flex', alignItems: 'center', gap: 4, fontWeight: 600 }
+                  : undefined
+              }
+            >
+              {contextPercent >= 90 && <AlertTriangle size={12} />}
+              Context: ~{contextPercent}% used
+            </span>
+            {costEstimate !== null && <span>Estimated cost: {formatCost(costEstimate)}</span>}
           </div>
         )}
       </div>

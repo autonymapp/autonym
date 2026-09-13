@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import {
+  Archive,
   BookOpen,
   Check,
   ChevronLeft,
@@ -136,7 +137,7 @@ export default function MessageBubble({
             setContextMenu({ x: e.clientX, y: e.clientY })
           }}
         >
-          {(speaker || matchedLore.length > 0) && (
+          {(speaker || matchedLore.length > 0 || message.excludedFromContext) && (
             <div
               style={{
                 display: 'flex',
@@ -157,6 +158,14 @@ export default function MessageBubble({
                   style={{ display: 'inline-flex', alignItems: 'center', opacity: 0.8, cursor: 'help' }}
                 >
                   <BookOpen size={11} />
+                </span>
+              )}
+              {message.excludedFromContext && (
+                <span
+                  title="Summarized into this Act's memory — no longer sent to the AI"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: 3, opacity: 0.8, cursor: 'help' }}
+                >
+                  <Archive size={11} /> Summarized
                 </span>
               )}
             </div>

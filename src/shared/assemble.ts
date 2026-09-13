@@ -213,7 +213,11 @@ export function assemblePrompt(params: {
     contentIntensity
   } = params
 
-  const recentText = history
+  // Messages folded into priorSummary by "Compact Older Messages" stay in the visible transcript
+  // but no longer count against the context budget or feed lorebook keyword matching.
+  const activeHistory = history.filter((m) => !m.excludedFromContext)
+
+  const recentText = activeHistory
     .slice(-LOREBOOK_SCAN_MESSAGES)
     .map((m) => m.content)
     .join('\n')
@@ -268,8 +272,8 @@ export function assemblePrompt(params: {
 
   const trimmedHistory: ChatMessage[] = []
   let used = 0
-  for (let i = history.length - 1; i >= 0; i--) {
-    const msg = history[i]
+  for (let i = activeHistory.length - 1; i >= 0; i--) {
+    const msg = activeHistory[i]
     const cost = estimateTokens(msg.content)
     if (used + cost > budget && trimmedHistory.length > 0) break
     trimmedHistory.unshift(msg)

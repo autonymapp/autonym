@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type {
   Chat,
   ChatMessage,
@@ -6,6 +6,7 @@ import type {
   ContentIntensity,
   CustomPreset,
   MoodPreset,
+  OpenRouterModel,
   Persona,
   RpMode,
   SamplerSettings,
@@ -107,6 +108,7 @@ export default function ChatPage(): JSX.Element {
   const [storylines, setStorylines] = useState<Storyline[]>([])
   const [newStorylineName, setNewStorylineName] = useState('')
   const [addingStoryline, setAddingStoryline] = useState(false)
+  const [models, setModels] = useState<OpenRouterModel[]>([])
   const [forking, setForking] = useState(false)
   const [journaling, setJournaling] = useState(false)
   const [journalStatus, setJournalStatus] = useState<string | null>(null)
@@ -259,6 +261,11 @@ export default function ChatPage(): JSX.Element {
 
   const activeCharacter = characters.find((c) => c.id === activeCharacterId) ?? null
   const activeChat = chats.find((c) => c.id === activeChatId) ?? null
+
+  useEffect(() => {
+    window.api.settings.fetchModels().then(setModels).catch(() => {})
+  }, [])
+  const selectedModel = models.find((m) => m.id === activeChat?.modelId)
 
   useEffect(() => {
     setDirectorsNotesDraft(activeChat?.directorsNotes ?? '')
@@ -648,6 +655,27 @@ export default function ChatPage(): JSX.Element {
     setChats((prev) => prev.map((c) => (c.id === updated.id ? updated : c)))
   }
 
+  // When the user actually picks a different model for this Act, sync Scene Memory to that
+  // model's real max in both directions — grow it for a bigger-context model, shrink it for a
+  // smaller one — so it always reflects what the currently-selected model actually supports.
+  // Tracked by chat+model pair so this only fires on a real switch, not on loading/reopening an
+  // Act (which would otherwise blow away a value the user deliberately set lower than the max).
+  const lastModelTrackRef = useRef<{ chatId: number; modelId: string } | null>(null)
+  useEffect(() => {
+    if (!activeChat || !selectedModel) return
+    const prev = lastModelTrackRef.current
+    const isModelSwitch = !!prev && prev.chatId === activeChat.id && prev.modelId !== activeChat.modelId
+    lastModelTrackRef.current = { chatId: activeChat.id, modelId: activeChat.modelId }
+    if (isModelSwitch && activeChat.samplerSettings.contextLength !== selectedModel.contextLength) {
+      updateSettings(
+        activeChat.modelId,
+        { ...activeChat.samplerSettings, contextLength: selectedModel.contextLength },
+        activeChat.rpMode
+      )
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeChat?.id, activeChat?.modelId, selectedModel?.contextLength])
+
   if (!activeCharacterId) {
     const usedUniverseIds = new Set(characters.map((c) => c.universeId).filter((id): id is number => id !== null))
     const modes = universes.filter((u) => usedUniverseIds.has(u.id))
@@ -675,7 +703,7 @@ export default function ChatPage(): JSX.Element {
               )}
             </button>
             <button className="btn btn-sm" onClick={() => setShowChatTrash((s) => !s)}>
-              <Trash2 size={14} /> {showChatTrash ? 'Close Trash' : 'Trash'}
+              <Trash2 size={14} /> {showChatTrash ? 'Back to Acts' : 'Trash'}
             </button>
           </div>
         </div>
@@ -1415,6 +1443,8 @@ export default function ChatPage(): JSX.Element {
                   impersonatingCharacter={impersonatingCharacter}
                   groupCharacters={groupCharacters}
                   onForkFromMessage={(messageId) => forkChat(messageId)}
+                  onContinueInNewChat={continueInNewChat}
+                  continuingInNewChat={continuing}
                 />
               </div>
             </div>
@@ -1922,6 +1952,7 @@ export default function ChatPage(): JSX.Element {
                       onChange={(settings) =>
                         updateSettings(activeChat.modelId, settings, activeChat.rpMode)
                       }
+                      maxContextLength={selectedModel?.contextLength}
                     />
                   </>
                 )}

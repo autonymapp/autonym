@@ -708,6 +708,13 @@ export const chatRepo = {
     persist()
     return store.chats[idx]
   },
+  setPriorSummary(id: number, priorSummary: string | null): Chat {
+    const idx = store.chats.findIndex((c) => c.id === id)
+    if (idx === -1) throw new Error('Chat not found')
+    store.chats[idx] = { ...store.chats[idx], priorSummary }
+    persist()
+    return store.chats[idx]
+  },
   /** Soft-delete — moves to Trash. Messages stay put, unreachable until restored. */
   delete(id: number): void {
     const idx = store.chats.findIndex((c) => c.id === id)
@@ -748,6 +755,7 @@ export const messageRepo = {
       bookmarked: input.bookmarked ?? false,
       speakerCharacterId: input.speakerCharacterId ?? null,
       matchedLoreEntryIds: input.matchedLoreEntryIds ?? [],
+      excludedFromContext: false,
       id: nextId(),
       createdAt: now()
     }
@@ -817,6 +825,15 @@ export const messageRepo = {
   },
   delete(id: number): void {
     store.messages = store.messages.filter((m) => m.id !== id)
+    persist()
+  },
+  /** Used by "Compact Older Messages" — folds everything up to and including uptoMessageId into
+   *  the chat's priorSummary, then flags those rows so assemblePrompt stops counting them against
+   *  the context budget. The messages themselves stay in place for the visible transcript. */
+  markExcludedFromContext(chatId: number, uptoMessageId: number): void {
+    store.messages = store.messages.map((m) =>
+      m.chatId === chatId && m.id <= uptoMessageId ? { ...m, excludedFromContext: true } : m
+    )
     persist()
   },
   /** Used by "Regenerate Whole Skit" to clear a chat back to a blank slate before rerunning
