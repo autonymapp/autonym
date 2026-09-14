@@ -1,7 +1,7 @@
 {
   "name": "autonym",
   "version": "0.1.0",
-  "description": "Autonym — a desktop AI roleplay/story app using OpenRouter, with structured Campfire-style character and lorebook authoring",
+  "description": "Autonym — a desktop AI roleplay/story-writing app using OpenRouter, with structured Crew and Records authoring",
   "main": "./out/main/index.js",
   "author": "autonymapp",
   "license": "MIT",

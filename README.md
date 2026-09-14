@@ -18,8 +18,8 @@ A structured, compendium-first desktop app for solo roleplayers and authors, bui
 
 ---
 
-Everything you'd want to know as a *user* — what Autonym does, how the Cast/Universes/Skits/Beat
-Sheet systems fit together, and where to download it — lives at **[autonym.app](https://autonym.app)**.
+Everything you'd want to know as a *user* — what Autonym does, how the Crew/Universes/Records/
+Journeys/Beacons systems fit together, and where to download it — lives at **[autonym.app](https://autonym.app)**.
 This README covers running the source and contributing.
 
 ## Running from source
