@@ -693,9 +693,11 @@ details[open] > summary .details-chevron {
   z-index: 100;
 }
 
+.mobile-drawer,
 .mobile-drawer-backdrop {
   display: none;
 }
+
 
 @media (max-width: 768px) {
   .app-container {
