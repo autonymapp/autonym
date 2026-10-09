@@ -29,6 +29,18 @@ async function bootstrap(): Promise<void> {
     await initWebApi()
   }
 
+  if (
+    typeof window !== 'undefined' &&
+    'serviceWorker' in navigator &&
+    window.location.protocol.startsWith('http')
+  ) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch((err) => {
+        console.warn('Service worker registration failed:', err)
+      })
+    })
+  }
+
   applyTheme(getStoredTheme())
   applyAccent(getStoredAccent())
   applyFontFamily(getStoredFontFamily())

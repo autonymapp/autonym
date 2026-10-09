@@ -3,10 +3,11 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig({
+  base: './',
   root: resolve(__dirname, 'src/renderer'),
   publicDir: resolve(__dirname, 'src/renderer/public'),
   build: {
-    outDir: resolve(__dirname, 'dist/web'),
+    outDir: resolve(__dirname, 'docs'),
     emptyOutDir: true
   },
   resolve: {
