@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { Check, Code2, Compass, Download, ExternalLink, Pencil, Plus, RefreshCw, Trash2, Upload } from 'lucide-react'
+import { Check, Cloud, Code2, Compass, Download, ExternalLink, Pencil, Plus, RefreshCw, Trash2, Upload } from 'lucide-react'
 import type { Persona } from '@shared/types'
+import { getStoredSupabaseConfig, saveSupabaseConfig, clearSupabaseConfig } from '../../../web/supabaseClient'
 import { useConfirm } from '../components/ConfirmDialog'
 import AutoGrowTextarea from '../components/AutoGrowTextarea'
 import { useAppStore } from '../store/appStore'
@@ -52,6 +53,7 @@ const SECTIONS: { id: string; label: string }[] = [
   { id: 'accessibility', label: 'Accessibility' },
   { id: 'api-key', label: 'API Key' },
   { id: 'backup', label: 'Backup & Restore' },
+  { id: 'cloud-sync', label: 'Cloud Sync (Supabase)' },
   { id: 'stats', label: 'Writing Stats' },
   { id: 'about', label: 'About' }
 ]
@@ -63,6 +65,10 @@ export default function SettingsPage(): JSX.Element {
   const [keyInput, setKeyInput] = useState('')
   const [status, setStatus] = useState<string | null>(null)
   const [theme, setTheme] = useState<ThemeId>(getStoredTheme())
+  const [supabaseConfig, setSupabaseConfig] = useState(() => getStoredSupabaseConfig())
+  const [supabaseUrlInput, setSupabaseUrlInput] = useState(supabaseConfig.url)
+  const [supabaseKeyInput, setSupabaseKeyInput] = useState(supabaseConfig.key)
+  const [supabaseStatus, setSupabaseStatus] = useState<string | null>(null)
   const [customAccent, setCustomAccent] = useState<string | null>(getStoredAccent())
   const [stats, setStats] = useState<StatsOverview | null>(null)
   const [backupStatus, setBackupStatus] = useState<string | null>(null)
@@ -644,6 +650,76 @@ export default function SettingsPage(): JSX.Element {
           </button>
         </div>
         {backupStatus && <p className="hint" style={{ marginTop: 10 }}>{backupStatus}</p>}
+      </div>
+
+      <div id="cloud-sync" className="panel" style={{ padding: 18, marginTop: 18, scrollMarginTop: 12 }}>
+        <h3 style={{ marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8 }}>
+          <Cloud size={18} style={{ color: 'var(--accent)' }} /> Cloud Sync (Supabase)
+        </h3>
+        <p className="hint" style={{ marginBottom: 14 }}>
+          Sync your acts, characters, and lorebooks across your PC and phone. When connected, any backup you
+          upload on PC is automatically synced to your phone, and new messages stay in sync in real time.
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 520 }}>
+          <div>
+            <label style={{ fontSize: 12, color: 'var(--text-dim)', display: 'block', marginBottom: 4 }}>
+              Supabase Project URL
+            </label>
+            <input
+              placeholder="https://xyzcompany.supabase.co"
+              value={supabaseUrlInput}
+              onChange={(e) => setSupabaseUrlInput(e.target.value)}
+              style={{ width: '100%' }}
+            />
+          </div>
+          <div>
+            <label style={{ fontSize: 12, color: 'var(--text-dim)', display: 'block', marginBottom: 4 }}>
+              Supabase Anon / Public Key
+            </label>
+            <input
+              type="password"
+              placeholder="eyJhbGciOiJIUzI1NiIsIn..."
+              value={supabaseKeyInput}
+              onChange={(e) => setSupabaseKeyInput(e.target.value)}
+              style={{ width: '100%' }}
+            />
+          </div>
+          <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+            <button
+              className="btn btn-primary btn-sm"
+              onClick={() => {
+                saveSupabaseConfig(supabaseUrlInput, supabaseKeyInput, true)
+                setSupabaseConfig(getStoredSupabaseConfig())
+                setSupabaseStatus('Supabase credentials saved and synced!')
+              }}
+            >
+              Save &amp; Connect
+            </button>
+            {supabaseConfig.url && (
+              <button
+                className="btn btn-danger btn-sm"
+                onClick={() => {
+                  clearSupabaseConfig()
+                  setSupabaseUrlInput('')
+                  setSupabaseKeyInput('')
+                  setSupabaseConfig(getStoredSupabaseConfig())
+                  setSupabaseStatus('Cloud sync disconnected.')
+                }}
+              >
+                Disconnect
+              </button>
+            )}
+          </div>
+          {supabaseStatus && <p className="hint" style={{ marginTop: 6 }}>{supabaseStatus}</p>}
+          <div style={{ marginTop: 8, fontSize: 12, color: 'var(--text-dim)' }}>
+            Status:{' '}
+            {supabaseConfig.enabled && supabaseConfig.url ? (
+              <span style={{ color: 'var(--success)', fontWeight: 600 }}>Connected (Auto-Syncing)</span>
+            ) : (
+              <span style={{ color: 'var(--text-faint)' }}>Not connected (Using local IndexedDB)</span>
+            )}
+          </div>
+        </div>
       </div>
 
       {stats && (

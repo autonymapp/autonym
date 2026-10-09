@@ -1,6 +1,18 @@
 import { useEffect, useState } from 'react'
 import type { LucideIcon } from 'lucide-react'
-import { BookOpen, ChevronLeft, ChevronRight, Globe, Home, MessageCircle, Settings as SettingsIcon, Map, Users } from 'lucide-react'
+import {
+  BookOpen,
+  ChevronLeft,
+  ChevronRight,
+  Globe,
+  Home,
+  Menu,
+  MessageCircle,
+  Settings as SettingsIcon,
+  Map,
+  Users,
+  X
+} from 'lucide-react'
 import { useAppStore } from './store/appStore'
 import type { Page } from './store/appStore'
 import AutonymMark from './components/AutonymMark'
@@ -59,11 +71,10 @@ function NavButton({
 export default function App(): JSX.Element {
   const { page, setPage, escapeHandlers, popEscapeHandler, openTour } = useAppStore()
   const [navCollapsed, setNavCollapsed] = useState(() => localStorage.getItem(NAV_COLLAPSED_KEY) === '1')
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false)
 
   useEffect(() => {
     if (shouldAutoStartTour()) openTour()
-    // Only meant to run once, on mount.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   function toggleNav(): void {
@@ -86,19 +97,111 @@ export default function App(): JSX.Element {
       } else if (mod && e.key === ',') {
         e.preventDefault()
         setPage('settings')
-      } else if (e.key === 'Escape' && escapeHandlers.length > 0) {
-        const top = escapeHandlers[escapeHandlers.length - 1]
-        popEscapeHandler(top)
-        top()
+      } else if (e.key === 'Escape') {
+        if (mobileDrawerOpen) {
+          setMobileDrawerOpen(false)
+          return
+        }
+        if (escapeHandlers.length > 0) {
+          const top = escapeHandlers[escapeHandlers.length - 1]
+          popEscapeHandler(top)
+          top()
+        }
       }
     }
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)
-  }, [escapeHandlers, popEscapeHandler, setPage])
+  }, [escapeHandlers, popEscapeHandler, setPage, mobileDrawerOpen])
+
+  const currentPageLabel = NAV_ITEMS.find((item) => item.page === page)?.label || 'Autonym'
 
   return (
-    <div style={{ display: 'flex', height: '100vh' }}>
+    <div className="app-container">
+      {/* Mobile Top Header */}
+      <header className="mobile-header">
+        <button
+          className="btn btn-ghost btn-sm"
+          onClick={() => setMobileDrawerOpen(true)}
+          style={{ padding: '6px', minWidth: 'auto', display: 'flex', alignItems: 'center' }}
+          aria-label="Open Navigation"
+        >
+          <Menu size={20} />
+        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <AutonymMark size={22} />
+          <span
+            style={{
+              fontFamily: "'Fredoka', 'Century Gothic', 'Poppins', 'Segoe UI', sans-serif",
+              fontWeight: 700,
+              fontSize: 16
+            }}
+          >
+            autonym
+          </span>
+        </div>
+        <div style={{ flex: 1 }} />
+        <span style={{ fontSize: 13, color: 'var(--text-dim)', fontWeight: 600 }}>{currentPageLabel}</span>
+      </header>
+
+      {/* Mobile Drawer Backdrop */}
+      <div
+        className={`mobile-drawer-backdrop${mobileDrawerOpen ? ' open' : ''}`}
+        onClick={() => setMobileDrawerOpen(false)}
+      />
+
+      {/* Mobile Drawer Menu */}
+      <aside className={`mobile-drawer${mobileDrawerOpen ? ' open' : ''}`}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingBottom: 16,
+            borderBottom: '1px solid var(--border)',
+            marginBottom: 12
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <AutonymMark size={24} />
+            <span
+              style={{
+                fontFamily: "'Fredoka', 'Century Gothic', 'Poppins', 'Segoe UI', sans-serif",
+                fontWeight: 700,
+                fontSize: 18
+              }}
+            >
+              autonym<span style={{ color: 'var(--text-faint)' }}>.</span>
+            </span>
+          </div>
+          <button
+            className="btn btn-ghost btn-sm"
+            onClick={() => setMobileDrawerOpen(false)}
+            style={{ padding: '4px', minWidth: 'auto' }}
+            aria-label="Close Navigation"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        {NAV_ITEMS.map((item) => (
+          <NavButton
+            key={item.page}
+            page={item.page}
+            label={item.label}
+            icon={item.icon}
+            active={page === item.page}
+            collapsed={false}
+            onClick={() => {
+              setPage(item.page)
+              setMobileDrawerOpen(false)
+            }}
+          />
+        ))}
+      </aside>
+
+      {/* Desktop Sidebar Navigation */}
       <nav
+        className="desktop-nav"
         style={{
           width: navCollapsed ? 56 : 190,
           borderRight: '1px solid var(--border)',
@@ -158,7 +261,9 @@ export default function App(): JSX.Element {
           {!navCollapsed && 'Collapse'}
         </button>
       </nav>
-      <main style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
+
+      {/* Main Content View */}
+      <main className="app-main" style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
         {page === 'home' && <HomePage />}
         {page === 'chat' && <ChatPage />}
         {page === 'characters' && <CharactersPage />}

@@ -22,22 +22,31 @@ import {
 } from './theme'
 import { ConfirmProvider } from './components/ConfirmDialog'
 import ErrorBoundary from './components/ErrorBoundary'
+import { initWebApi } from '../../web/initWebApi'
 
-applyTheme(getStoredTheme())
-applyAccent(getStoredAccent())
-applyFontFamily(getStoredFontFamily())
-applyChatTextSize(getStoredChatTextSize())
-applyLineSpacing(getStoredLineSpacing())
-applyHighContrast(getStoredHighContrast())
-applyReduceMotion(getStoredReduceMotion())
-applyBoldFormatting(getStoredBoldFormatting())
+async function bootstrap(): Promise<void> {
+  if (typeof window !== 'undefined' && !(window as any).api) {
+    await initWebApi()
+  }
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <ErrorBoundary>
-      <ConfirmProvider>
-        <App />
-      </ConfirmProvider>
-    </ErrorBoundary>
-  </React.StrictMode>
-)
+  applyTheme(getStoredTheme())
+  applyAccent(getStoredAccent())
+  applyFontFamily(getStoredFontFamily())
+  applyChatTextSize(getStoredChatTextSize())
+  applyLineSpacing(getStoredLineSpacing())
+  applyHighContrast(getStoredHighContrast())
+  applyReduceMotion(getStoredReduceMotion())
+  applyBoldFormatting(getStoredBoldFormatting())
+
+  ReactDOM.createRoot(document.getElementById('root')!).render(
+    <React.StrictMode>
+      <ErrorBoundary>
+        <ConfirmProvider>
+          <App />
+        </ConfirmProvider>
+      </ErrorBoundary>
+    </React.StrictMode>
+  )
+}
+
+bootstrap()

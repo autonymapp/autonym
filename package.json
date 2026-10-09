@@ -9,6 +9,9 @@
   "scripts": {
     "dev": "electron-vite dev",
     "build": "electron-vite build",
+    "dev:web": "vite --config vite.config.web.ts",
+    "build:web": "vite build --config vite.config.web.ts",
+    "preview:web": "vite preview --config vite.config.web.ts",
     "postinstall": "electron-builder install-app-deps",
     "build:win": "electron-vite build && electron-builder --win",
     "icons": "node scripts/generate-icons.mjs",
@@ -16,8 +19,11 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.116.0",
     "adm-zip": "^0.6.1",
-    "electron-updater": "^6.3.4"
+    "electron-updater": "^6.3.4",
+    "idb-keyval": "^6.3.0",
+    "jszip": "^3.10.2"
   },
   "devDependencies": {
     "@electron-toolkit/preload": "^3.0.1",
