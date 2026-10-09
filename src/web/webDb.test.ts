@@ -86,7 +86,24 @@ describe('webDb — in-memory and repository logic', () => {
     const { initDb, chatRepo, messageRepo, characterRepo } = await import('./webDb')
     await initDb()
 
-    const char = characterRepo.list()[0]
+    const char = characterRepo.create({
+      name: 'Act Tester',
+      avatarType: 'monogram',
+      avatarPath: null,
+      avatarEmoji: null,
+      universeId: null,
+      baseCharacterId: null,
+      isWorldbuildingAssistant: false,
+      tags: [],
+      appearance: '',
+      personality: '',
+      speechStyle: '',
+      background: '',
+      relationships: '',
+      scenario: '',
+      firstMessage: 'Hello',
+      notes: ''
+    })
     const chat = chatRepo.create({
       characterId: char.id,
       personaId: null,
