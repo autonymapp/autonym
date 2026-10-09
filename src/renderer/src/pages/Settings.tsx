@@ -657,8 +657,8 @@ export default function SettingsPage(): JSX.Element {
           <Cloud size={18} style={{ color: 'var(--accent)' }} /> Cloud Sync (Supabase)
         </h3>
         <p className="hint" style={{ marginBottom: 14 }}>
-          Sync your acts, characters, and lorebooks across your PC and phone. When connected, any backup you
-          upload on PC is automatically synced to your phone, and new messages stay in sync in real time.
+          Sync your chats, characters, and lorebooks across your devices. When connected, your data
+          automatically stays in sync in real time.
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 520 }}>
           <div>

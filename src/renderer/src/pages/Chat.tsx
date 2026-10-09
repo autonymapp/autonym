@@ -685,9 +685,9 @@ export default function ChatPage(): JSX.Element {
       <div style={{ padding: '24px 28px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
-            <h2 style={{ marginBottom: 4 }}>Choose Your Scene Partner</h2>
+            <h2 style={{ marginBottom: 4 }}>Characters</h2>
             <p className="hint" style={{ marginBottom: 16 }}>
-              Pick who takes the stage — you'll cast yourself next, inside the scene.
+              Select a character to start or continue chatting.
             </p>
             {loadError && <p className="hint" style={{ color: 'var(--danger)' }}>{loadError}</p>}
           </div>
@@ -702,7 +702,7 @@ export default function ChatPage(): JSX.Element {
               )}
             </button>
             <button className="btn btn-sm" onClick={() => setShowChatTrash((s) => !s)}>
-              <Trash2 size={14} /> {showChatTrash ? 'Back to Acts' : 'Trash'}
+              <Trash2 size={14} /> {showChatTrash ? 'Back to Chats' : 'Trash'}
             </button>
           </div>
         </div>
@@ -840,7 +840,7 @@ export default function ChatPage(): JSX.Element {
 
         {allChats.length > 0 && (
           <>
-            <div className="section-title" style={{ marginTop: 28 }}>All Acts</div>
+            <div className="section-title" style={{ marginTop: 28 }}>All Chats</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 4, maxWidth: 520 }}>
               {allChats
                 .filter((c) => {
@@ -933,7 +933,7 @@ export default function ChatPage(): JSX.Element {
       >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
           <button className="btn btn-ghost btn-sm" onClick={switchToChatsScreen} style={{ alignSelf: 'flex-start' }}>
-            <ArrowLeft size={14} /> Switch Character
+            <ArrowLeft size={14} /> All Characters
           </button>
           <button
             className="msg-action-btn"
@@ -943,7 +943,7 @@ export default function ChatPage(): JSX.Element {
             <ChevronLeft size={14} />
           </button>
         </div>
-        <div className="section-title" style={{ marginTop: 0 }}>Your Scene Partner</div>
+        <div className="section-title" style={{ marginTop: 0 }}>Character</div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
           <Avatar
             avatarType={activeCharacter?.avatarType}
@@ -958,20 +958,20 @@ export default function ChatPage(): JSX.Element {
           <input
             value={newActTitleDraft}
             onChange={(e) => setNewActTitleDraft(e.target.value)}
-            placeholder="Act name (optional)"
+            placeholder="Chat title (optional)"
             style={{ fontSize: 12.5 }}
           />
           <button className="btn btn-primary btn-sm" onClick={() => newChat('narrative')}>
-            + Story/Narrative RP
+            + Roleplay Chat
           </button>
           <button className="btn btn-primary btn-sm" onClick={() => newChat('dm')}>
-            + Dialogue/Direct Message RP
+            + Direct Message
           </button>
           <button className="btn btn-ghost btn-sm" onClick={() => setPage('scenarios')}>
-            <Sparkles size={13} style={{ marginRight: 6 }} /> Write a Skit in Improvise
+            <Sparkles size={13} style={{ marginRight: 6 }} /> Scenarios
           </button>
         </div>
-        <div className="section-title">Acts</div>
+        <div className="section-title">Chats</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {(() => {
             function renderChat(c: Chat): JSX.Element {
@@ -1221,7 +1221,7 @@ export default function ChatPage(): JSX.Element {
                       <strong style={{ fontSize: 14 }}>{activeChat.title}</strong>
                       <button
                         className="msg-action-btn"
-                        title="Rename this act"
+                        title="Rename chat"
                         onClick={() => startRename(activeChat)}
                       >
                         <Pencil size={12} />
@@ -1259,7 +1259,7 @@ export default function ChatPage(): JSX.Element {
                         style={{ background: 'var(--bg-hover)', color: 'var(--text-dim)', display: 'inline-flex', alignItems: 'center', gap: 4 }}
                         title={activeChat.priorSummary}
                       >
-                        <ScrollText size={12} /> Continued story
+                        <ScrollText size={12} /> Continued chat
                       </span>
                     )}
                     {activeChat.collaborativeMode && (
@@ -1290,7 +1290,7 @@ export default function ChatPage(): JSX.Element {
                       'Extracting…'
                     ) : (
                       <>
-                        <Wrench size={14} /> Story Tools ▾
+                        <Wrench size={14} /> Tools ▾
                       </>
                     )}
                   </button>
@@ -1314,29 +1314,29 @@ export default function ChatPage(): JSX.Element {
                       <button
                         className="btn btn-ghost btn-sm"
                         style={{ justifyContent: 'flex-start' }}
-                        title="Summarize this act and start a fresh one that remembers it, without replaying the whole history"
+                        title="Summarize this chat and start a fresh one that remembers it"
                         onClick={() => {
                           setToolsMenuOpen(false)
                           continueInNewChat()
                         }}
                       >
-                        <FastForward size={14} /> Continue in New Act
+                        <FastForward size={14} /> Continue in New Chat
                       </button>
                       <button
                         className="btn btn-ghost btn-sm"
                         style={{ justifyContent: 'flex-start' }}
-                        title="Duplicate this whole act into a new one you can take in a different direction"
+                        title="Duplicate this chat into a new one you can take in a different direction"
                         onClick={() => {
                           setToolsMenuOpen(false)
                           forkChat(null)
                         }}
                       >
-                        <GitFork size={14} /> Fork From Here
+                        <GitFork size={14} /> Fork Chat
                       </button>
                       <button
                         className="btn btn-ghost btn-sm"
                         style={{ justifyContent: 'flex-start' }}
-                        title="Summarize this act into this character's journal"
+                        title="Summarize this chat into this character's journal"
                         onClick={() => {
                           setToolsMenuOpen(false)
                           addToJournal()
@@ -1354,7 +1354,7 @@ export default function ChatPage(): JSX.Element {
                             saveCharacterFromChat()
                           }}
                         >
-                          <UserPlus size={14} /> Save Character From Act
+                          <UserPlus size={14} /> Save Character From Chat
                         </button>
                       )}
                     </div>
@@ -1445,7 +1445,7 @@ export default function ChatPage(): JSX.Element {
               >
                 <div className="panel" style={{ padding: 10, marginBottom: 14, background: 'var(--bg-sunken)' }}>
                   <div style={{ fontSize: 12, display: 'flex', alignItems: 'center', gap: 5 }}>
-                    <UserCircle size={13} /> You're in a scene with <strong>{activeCharacter.name}</strong>
+                    <UserCircle size={13} /> Chatting with <strong>{activeCharacter.name}</strong>
                   </div>
                 </div>
 
@@ -1949,7 +1949,7 @@ export default function ChatPage(): JSX.Element {
             )}
           </>
         ) : (
-          <div className="empty-state" style={{ margin: 'auto' }}>Select or create an act.</div>
+          <div className="empty-state" style={{ margin: 'auto' }}>Select or create a chat.</div>
         )}
       </div>
     </div>

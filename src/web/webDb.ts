@@ -1204,16 +1204,35 @@ export async function initDb(): Promise<void> {
     } else {
       // 3. Fresh installation
       store = emptyStore()
-      seedTutorialContent()
       persist()
     }
   }
 
-  // Ensure tutorial content exists if not present
-  if (!store.characters.some((c) => c.tags.includes('tutorial'))) {
-    seedTutorialContent()
+  // Remove fake/tutorial seed profiles if present
+  const seedNames = new Set(['Nym', 'Wren', 'Dorian Vance'])
+  const hasTutorial = store.characters.some((c) => seedNames.has(c.name) || c.tags.includes('tutorial'))
+  if (hasTutorial) {
+    const isOnlySeed = store.characters.every((c) => seedNames.has(c.name) || c.tags.includes('tutorial'))
+    if (isOnlySeed) {
+      store = emptyStore()
+    } else {
+      const seedIds = new Set(
+        store.characters
+          .filter((c) => seedNames.has(c.name) || c.tags.includes('tutorial'))
+          .map((c) => c.id)
+      )
+      store.characters = store.characters.filter((c) => !seedIds.has(c.id))
+      const removedChatIds = new Set(
+        store.chats.filter((ch) => seedIds.has(ch.characterId)).map((ch) => ch.id)
+      )
+      store.chats = store.chats.filter((ch) => !removedChatIds.has(ch.id))
+      store.messages = store.messages.filter((m) => !removedChatIds.has(m.chatId))
+      store.universes = store.universes.filter((u) => u.name !== 'The Between' && u.name !== 'Thornwood')
+      store.lorebooks = store.lorebooks.filter((l) => !l.name.includes('The Between'))
+    }
     persist()
   }
+
 
   // 4. Subscribe to Realtime updates if Supabase is connected
   subscribeToCloudChanges((remoteStore) => {

@@ -182,10 +182,9 @@ export default function ScenarioMakerPage(): JSX.Element {
 
   return (
     <div style={{ padding: '24px 28px', height: '100%', overflowY: 'auto' }}>
-      <h2 style={{ marginBottom: 4 }}>Improvise</h2>
+      <h2 style={{ marginBottom: 4 }}>Scenarios</h2>
       <p className="hint" style={{ marginBottom: 24 }}>
-        Reusable scene setups and unattended Skits — the two ways to hand a story some shape
-        without writing every beat of it yourself.
+        Reusable scene setups and milestones to guide your chats.
       </p>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -195,8 +194,8 @@ export default function ScenarioMakerPage(): JSX.Element {
         </button>
       </div>
       <p className="hint" style={{ marginTop: 8, marginBottom: 20 }}>
-        Reusable scene setups with a loose roadmap of milestones. Attach one to any act from its
-        Model & Settings panel.
+        Reusable scene setups with a loose roadmap of milestones. Attach one to any chat from its
+        Model &amp; Settings panel.
       </p>
 
       {scenarios.length === 0 ? (

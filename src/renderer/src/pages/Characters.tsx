@@ -382,14 +382,14 @@ export default function CharactersPage(): JSX.Element {
   return (
     <div style={{ padding: '24px 28px', height: '100%', overflowY: 'auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2>Cast</h2>
+        <h2>Characters</h2>
         <div style={{ display: 'flex', gap: 8 }}>
           <button
             className="btn btn-ghost"
             onClick={() => setShowTrash((s) => !s)}
             style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
           >
-            <Trash2 size={14} /> {showTrash ? 'Back to Cast' : 'Trash'}
+            <Trash2 size={14} /> {showTrash ? 'Back to Characters' : 'Trash'}
           </button>
           {!showTrash && (
             <>
@@ -401,7 +401,7 @@ export default function CharactersPage(): JSX.Element {
               >
                 {importing ? 'Importing…' : (
                   <>
-                    <Download size={14} /> Import Character File
+                    <Download size={14} /> Import Character
                   </>
                 )}
               </button>
@@ -488,7 +488,7 @@ export default function CharactersPage(): JSX.Element {
             </div>
           )}
           {characters.length === 0 ? (
-        <div className="empty-state">No cast members yet. Create one, or import a character file to get started.</div>
+        <div className="empty-state">No characters yet. Create one, or import a character card to get started.</div>
       ) : visibleCharacters.length === 0 ? (
         <div className="empty-state">No characters match this filter.</div>
       ) : (

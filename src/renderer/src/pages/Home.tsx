@@ -56,7 +56,7 @@ export default function HomePage(): JSX.Element {
         <h2 style={{ margin: 0 }}>Welcome back{getStoredProfileName() ? `, ${getStoredProfileName()}` : ''}</h2>
       </div>
       <p className="hint" style={{ marginBottom: 20 }}>
-        Jump back into a recent act, or pick up with a cast member.
+        Jump back into a recent chat, or continue with a character.
       </p>
 
       {error && (
@@ -113,10 +113,10 @@ export default function HomePage(): JSX.Element {
         </div>
       )}
 
-      <div className="section-title" data-tour="home-recent-acts">Recent Acts</div>
+      <div className="section-title" data-tour="home-recent-acts">Recent Chats</div>
       {recentActs.length === 0 ? (
         <div className="empty-state" style={{ marginBottom: 24 }}>
-          No acts yet — pick a cast member below to start one.
+          No chats yet — select a character below to start one.
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 10, marginBottom: 24 }}>
@@ -155,9 +155,9 @@ export default function HomePage(): JSX.Element {
         </div>
       )}
 
-      <div className="section-title" data-tour="home-cast">Cast</div>
+      <div className="section-title" data-tour="home-cast">Characters</div>
       {characters.length === 0 ? (
-        <div className="empty-state">No cast members yet — create one on the Cast page.</div>
+        <div className="empty-state">No characters yet — create or import one on the Characters page.</div>
       ) : (
         <div
           style={{

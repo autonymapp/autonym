@@ -21,22 +21,18 @@ describe('webDb — in-memory and repository logic', () => {
     vi.resetModules()
   })
 
-  it('initializes fresh database with tutorial content (Nym and The Between)', async () => {
+  it('initializes fresh database cleanly without seed tutorial content', async () => {
     const { initDb, characterRepo, universeRepo, lorebookRepo } = await import('./webDb')
     await initDb()
 
     const characters = characterRepo.list()
-    expect(characters.length).toBeGreaterThanOrEqual(3)
-
-    const nym = characters.find((c) => c.tags.includes('tutorial'))
-    expect(nym).toBeDefined()
-    expect(nym?.name).toBe('Nym')
+    expect(characters.length).toBe(0)
 
     const universes = universeRepo.list()
-    expect(universes.some((u) => u.name === 'The Between')).toBe(true)
+    expect(universes.length).toBe(0)
 
     const lorebooks = lorebookRepo.list()
-    expect(lorebooks.some((l) => l.name.includes('The Between'))).toBe(true)
+    expect(lorebooks.length).toBe(0)
   })
 
   it('handles character creation, update, and soft deletion', async () => {

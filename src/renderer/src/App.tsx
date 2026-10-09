@@ -16,7 +16,7 @@ import {
 import { useAppStore } from './store/appStore'
 import type { Page } from './store/appStore'
 import AutonymMark from './components/AutonymMark'
-import TourOverlay, { shouldAutoStartTour } from './components/TourOverlay'
+import TourOverlay from './components/TourOverlay'
 import HomePage from './pages/Home'
 import CharactersPage from './pages/Characters'
 import LorebooksPage from './pages/Lorebooks'
@@ -27,11 +27,11 @@ import SettingsPage from './pages/Settings'
 
 const NAV_ITEMS: { page: Page; label: string; icon: LucideIcon }[] = [
   { page: 'home', label: 'Home', icon: Home },
-  { page: 'chat', label: 'Acts', icon: MessageCircle },
-  { page: 'characters', label: 'Cast', icon: Users },
+  { page: 'chat', label: 'Chats', icon: MessageCircle },
+  { page: 'characters', label: 'Characters', icon: Users },
   { page: 'universes', label: 'Universes', icon: Globe },
   { page: 'lorebooks', label: 'Lorebooks', icon: BookOpen },
-  { page: 'scenarios', label: 'Improvise', icon: Map },
+  { page: 'scenarios', label: 'Scenarios', icon: Map },
   { page: 'settings', label: 'Settings', icon: SettingsIcon }
 ]
 
@@ -69,13 +69,10 @@ function NavButton({
 }
 
 export default function App(): JSX.Element {
-  const { page, setPage, escapeHandlers, popEscapeHandler, openTour } = useAppStore()
+  const { page, setPage, escapeHandlers, popEscapeHandler } = useAppStore()
   const [navCollapsed, setNavCollapsed] = useState(() => localStorage.getItem(NAV_COLLAPSED_KEY) === '1')
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false)
 
-  useEffect(() => {
-    if (shouldAutoStartTour()) openTour()
-  }, [])
 
   function toggleNav(): void {
     setNavCollapsed((prev) => {
