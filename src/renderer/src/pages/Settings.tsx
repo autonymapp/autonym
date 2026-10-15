@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { Check, Cloud, Code2, Download, ExternalLink, Pencil, Plus, RefreshCw, Trash2, Upload } from 'lucide-react'
 import type { Persona } from '@shared/types'
-import { getStoredSupabaseConfig, saveSupabaseConfig, clearSupabaseConfig } from '../../../web/supabaseClient'
+import { getSignedInEmail, signIn, signOut, signUp } from '../../../web/supabaseClient'
+import { queueLocalDataForUpload } from '../../../web/webDb'
 import { useConfirm } from '../components/ConfirmDialog'
 import AutoGrowTextarea from '../components/AutoGrowTextarea'
 import {
@@ -52,7 +53,7 @@ const SECTIONS: { id: string; label: string }[] = [
   { id: 'accessibility', label: 'Accessibility' },
   { id: 'api-key', label: 'API Key' },
   { id: 'backup', label: 'Backup & Restore' },
-  { id: 'cloud-sync', label: 'Cloud Sync (Supabase)' },
+  { id: 'cloud-sync', label: 'Cloud Sync' },
   { id: 'stats', label: 'Writing Stats' },
   { id: 'about', label: 'About' }
 ]
@@ -63,10 +64,53 @@ export default function SettingsPage(): JSX.Element {
   const [keyInput, setKeyInput] = useState('')
   const [status, setStatus] = useState<string | null>(null)
   const [theme, setTheme] = useState<ThemeId>(getStoredTheme())
-  const [supabaseConfig, setSupabaseConfig] = useState(() => getStoredSupabaseConfig())
-  const [supabaseUrlInput, setSupabaseUrlInput] = useState(supabaseConfig.url)
-  const [supabaseKeyInput, setSupabaseKeyInput] = useState(supabaseConfig.key)
-  const [supabaseStatus, setSupabaseStatus] = useState<string | null>(null)
+  const [syncEmail, setSyncEmail] = useState<string | null>(null)
+  const [emailInput, setEmailInput] = useState('')
+  const [passwordInput, setPasswordInput] = useState('')
+  const [syncBusy, setSyncBusy] = useState(false)
+  const [syncStatus, setSyncStatus] = useState<string | null>(null)
+
+  useEffect(() => {
+    getSignedInEmail().then(setSyncEmail)
+  }, [])
+
+  async function handleSignIn(): Promise<void> {
+    setSyncBusy(true)
+    setSyncStatus(null)
+    const error = await signIn(emailInput, passwordInput)
+    if (error) {
+      setSyncStatus(error)
+      setSyncBusy(false)
+      return
+    }
+    // Reload so sync starts fresh under this account, merging what's on this device into it.
+    await queueLocalDataForUpload()
+    location.reload()
+  }
+
+  async function handleCreateAccount(): Promise<void> {
+    setSyncBusy(true)
+    setSyncStatus(null)
+    const { error, confirm } = await signUp(emailInput, passwordInput)
+    if (error) {
+      setSyncStatus(error)
+      setSyncBusy(false)
+      return
+    }
+    if (confirm) {
+      setSyncStatus('Check your email and tap the confirmation link, then come back here and sign in.')
+      setSyncBusy(false)
+      return
+    }
+    await queueLocalDataForUpload()
+    location.reload()
+  }
+
+  async function handleSignOut(): Promise<void> {
+    setSyncBusy(true)
+    await signOut()
+    location.reload()
+  }
   const [customAccent, setCustomAccent] = useState<string | null>(getStoredAccent())
   const [stats, setStats] = useState<StatsOverview | null>(null)
   const [backupStatus, setBackupStatus] = useState<string | null>(null)
@@ -654,72 +698,71 @@ export default function SettingsPage(): JSX.Element {
 
       <div id="cloud-sync" className="panel" style={{ padding: 18, marginTop: 18, scrollMarginTop: 12 }}>
         <h3 style={{ marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Cloud size={18} style={{ color: 'var(--accent)' }} /> Cloud Sync (Supabase)
+          <Cloud size={18} style={{ color: 'var(--accent)' }} /> Cloud Sync
         </h3>
         <p className="hint" style={{ marginBottom: 14 }}>
-          Sync your chats, characters, and lorebooks across your devices. When connected, your data
-          automatically stays in sync in real time.
+          Sign in on each device to keep your chats, characters and lorebooks in sync. Your OpenRouter
+          key stays on each device.
         </p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 520 }}>
-          <div>
-            <label style={{ fontSize: 12, color: 'var(--text-dim)', display: 'block', marginBottom: 4 }}>
-              Supabase Project URL
-            </label>
-            <input
-              placeholder="https://xyzcompany.supabase.co"
-              value={supabaseUrlInput}
-              onChange={(e) => setSupabaseUrlInput(e.target.value)}
-              style={{ width: '100%' }}
-            />
-          </div>
-          <div>
-            <label style={{ fontSize: 12, color: 'var(--text-dim)', display: 'block', marginBottom: 4 }}>
-              Supabase Anon / Public Key
-            </label>
-            <input
-              type="password"
-              placeholder="eyJhbGciOiJIUzI1NiIsIn..."
-              value={supabaseKeyInput}
-              onChange={(e) => setSupabaseKeyInput(e.target.value)}
-              style={{ width: '100%' }}
-            />
-          </div>
-          <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
-            <button
-              className="btn btn-primary btn-sm"
-              onClick={() => {
-                saveSupabaseConfig(supabaseUrlInput, supabaseKeyInput, true)
-                setSupabaseConfig(getStoredSupabaseConfig())
-                setSupabaseStatus('Supabase credentials saved and synced!')
-              }}
-            >
-              Save &amp; Connect
-            </button>
-            {supabaseConfig.url && (
-              <button
-                className="btn btn-danger btn-sm"
-                onClick={() => {
-                  clearSupabaseConfig()
-                  setSupabaseUrlInput('')
-                  setSupabaseKeyInput('')
-                  setSupabaseConfig(getStoredSupabaseConfig())
-                  setSupabaseStatus('Cloud sync disconnected.')
-                }}
-              >
-                Disconnect
+        {syncEmail ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 520 }}>
+            <div style={{ fontSize: 13 }}>
+              Signed in as <strong>{syncEmail}</strong>
+            </div>
+            <div style={{ fontSize: 12, color: 'var(--text-dim)' }}>
+              Status: <span style={{ color: 'var(--success)', fontWeight: 600 }}>Syncing</span>
+            </div>
+            <div>
+              <button className="btn btn-sm" onClick={handleSignOut} disabled={syncBusy}>
+                Sign Out
               </button>
-            )}
+            </div>
           </div>
-          {supabaseStatus && <p className="hint" style={{ marginTop: 6 }}>{supabaseStatus}</p>}
-          <div style={{ marginTop: 8, fontSize: 12, color: 'var(--text-dim)' }}>
-            Status:{' '}
-            {supabaseConfig.enabled && supabaseConfig.url ? (
-              <span style={{ color: 'var(--success)', fontWeight: 600 }}>Connected (Auto-Syncing)</span>
-            ) : (
-              <span style={{ color: 'var(--text-faint)' }}>Not connected (Using local IndexedDB)</span>
-            )}
-          </div>
-        </div>
+        ) : (
+          <form
+            style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 520 }}
+            onSubmit={(e) => {
+              e.preventDefault()
+              handleSignIn()
+            }}
+          >
+            <label className="field">
+              <span className="label">Email</span>
+              <input
+                type="email"
+                autoComplete="email"
+                value={emailInput}
+                onChange={(e) => setEmailInput(e.target.value)}
+                style={{ width: '100%' }}
+              />
+            </label>
+            <label className="field">
+              <span className="label">Password</span>
+              <input
+                type="password"
+                autoComplete="current-password"
+                value={passwordInput}
+                onChange={(e) => setPasswordInput(e.target.value)}
+                style={{ width: '100%' }}
+              />
+            </label>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <button type="submit" className="btn btn-primary btn-sm" disabled={syncBusy || !emailInput || !passwordInput}>
+                Sign In
+              </button>
+              <button
+                type="button"
+                className="btn btn-sm"
+                onClick={handleCreateAccount}
+                disabled={syncBusy || !emailInput || passwordInput.length < 6}
+              >
+                Create Account
+              </button>
+            </div>
+            <p className="hint">First time? Enter your email and a password, then tap Create Account. On your other devices, just sign in.</p>
+          </form>
+        )}
+        {syncStatus && <p className="hint" style={{ marginTop: 8 }}>{syncStatus}</p>}
       </div>
 
       {stats && (

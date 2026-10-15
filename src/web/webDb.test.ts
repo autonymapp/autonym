@@ -10,6 +10,7 @@ vi.mock('./webStorage', () => ({
 }))
 
 vi.mock('./supabaseClient', () => ({
+  loadSession: vi.fn().mockResolvedValue(null),
   loadStoreFromCloud: vi.fn().mockResolvedValue({ status: 'empty' }),
   saveStoreToCloud: vi.fn().mockResolvedValue('ok'),
   uploadAvatarToCloud: vi.fn().mockResolvedValue(null),

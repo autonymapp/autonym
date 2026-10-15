@@ -1,58 +1,22 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import type { Store } from './webDb'
 
-const SUPABASE_URL_KEY = 'autonym:supabase_url'
-const SUPABASE_KEY_KEY = 'autonym:supabase_anon_key'
-const SUPABASE_SYNC_ENABLED_KEY = 'autonym:supabase_sync_enabled'
+// Autonym's own Supabase project. The publishable key is meant to ship in the app: row level
+// security only lets a signed-in owner read or write their own data.
+const SUPABASE_URL = (import.meta as any).env?.VITE_SUPABASE_URL || 'https://vcxoomhjctrjtygejlzc.supabase.co'
+const SUPABASE_KEY =
+  (import.meta as any).env?.VITE_SUPABASE_ANON_KEY ||
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjeG9vbWhqY3RyanR5Z2VqbHpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIwNTQ4MzgsImV4cCI6MjEwNzYzMDgzOH0.lrciuLTglizmxHsWLgoyMyu0J-L5qfc0X8llo6KgIZM'
 
 let supabaseInstance: SupabaseClient | null = null
-let currentConfigKey = ''
-
-export function getStoredSupabaseConfig(): { url: string; key: string; enabled: boolean } {
-  const envUrl = (import.meta as any).env?.VITE_SUPABASE_URL || ''
-  const envKey = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY || ''
-  const localUrl = localStorage.getItem(SUPABASE_URL_KEY) || ''
-  const localKey = localStorage.getItem(SUPABASE_KEY_KEY) || ''
-  const storedEnabled = localStorage.getItem(SUPABASE_SYNC_ENABLED_KEY)
-
-  const url = localUrl || envUrl
-  const key = localKey || envKey
-  // Default to enabled if url and key are provided, unless explicitly set to '0'
-  const enabled = storedEnabled !== '0' && Boolean(url && key)
-
-  return { url, key, enabled }
-}
-
-export function saveSupabaseConfig(url: string, key: string, enabled = true): void {
-  localStorage.setItem(SUPABASE_URL_KEY, url.trim())
-  localStorage.setItem(SUPABASE_KEY_KEY, key.trim())
-  localStorage.setItem(SUPABASE_SYNC_ENABLED_KEY, enabled ? '1' : '0')
-  supabaseInstance = null
-  currentConfigKey = ''
-}
-
-export function clearSupabaseConfig(): void {
-  localStorage.removeItem(SUPABASE_URL_KEY)
-  localStorage.removeItem(SUPABASE_KEY_KEY)
-  localStorage.removeItem(SUPABASE_SYNC_ENABLED_KEY)
-  supabaseInstance = null
-  currentConfigKey = ''
-}
+let userId: string | null = null
 
 export function getSupabase(): SupabaseClient | null {
-  const { url, key, enabled } = getStoredSupabaseConfig()
-  if (!enabled || !url || !key) return null
-
-  const configKey = `${url}::${key}`
-  if (supabaseInstance && currentConfigKey === configKey) {
-    return supabaseInstance
-  }
-
+  if (supabaseInstance) return supabaseInstance
   try {
-    supabaseInstance = createClient(url, key, {
-      auth: { persistSession: false }
+    supabaseInstance = createClient(SUPABASE_URL, SUPABASE_KEY, {
+      auth: { persistSession: true, autoRefreshToken: true, storageKey: 'autonym:auth' }
     })
-    currentConfigKey = configKey
     return supabaseInstance
   } catch (err) {
     console.error('Failed to initialize Supabase client:', err)
@@ -60,8 +24,52 @@ export function getSupabase(): SupabaseClient | null {
   }
 }
 
+/** Reads the saved sign-in, if any. Sync only runs while signed in. */
+export async function loadSession(): Promise<string | null> {
+  const supabase = getSupabase()
+  if (!supabase) return null
+  try {
+    const { data } = await supabase.auth.getSession()
+    userId = data.session?.user.id ?? null
+    return data.session?.user.email ?? null
+  } catch {
+    userId = null
+    return null
+  }
+}
+
+export async function getSignedInEmail(): Promise<string | null> {
+  return loadSession()
+}
+
+export async function signIn(email: string, password: string): Promise<string | null> {
+  const supabase = getSupabase()
+  if (!supabase) return 'Cloud sync is unavailable right now.'
+  const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
+  return error ? error.message : null
+}
+
+/** Creates the account. Returns `confirm` when Supabase wants the email confirmed first. */
+export async function signUp(email: string, password: string): Promise<{ error: string | null; confirm: boolean }> {
+  const supabase = getSupabase()
+  if (!supabase) return { error: 'Cloud sync is unavailable right now.', confirm: false }
+  const { data, error } = await supabase.auth.signUp({
+    email: email.trim(),
+    password,
+    options: { emailRedirectTo: typeof location !== 'undefined' ? location.origin : undefined }
+  })
+  if (error) return { error: error.message, confirm: false }
+  return { error: null, confirm: !data.session }
+}
+
+export async function signOut(): Promise<void> {
+  const supabase = getSupabase()
+  if (supabase) await supabase.auth.signOut()
+  userId = null
+}
+
 export function isCloudSyncEnabled(): boolean {
-  return getSupabase() !== null
+  return userId !== null
 }
 
 /**
@@ -77,13 +85,13 @@ export type CloudLoadResult =
 
 export async function loadStoreFromCloud(): Promise<CloudLoadResult> {
   const supabase = getSupabase()
-  if (!supabase) return { status: 'unavailable' }
+  if (!supabase || !userId) return { status: 'unavailable' }
 
   try {
     const { data, error } = await supabase
       .from('autonym_store')
       .select('data, updated_at')
-      .eq('id', 'default')
+      .eq('id', userId)
       .maybeSingle()
 
     if (error) {
@@ -111,10 +119,10 @@ export async function saveStoreToCloud(
   expectedUpdatedAt: string | null
 ): Promise<'ok' | 'conflict' | 'error'> {
   const supabase = getSupabase()
-  if (!supabase) return 'error'
+  if (!supabase || !userId) return 'error'
 
   try {
-    const row = { id: 'default', data: store, updated_at: new Date().toISOString() }
+    const row = { id: userId, data: store, updated_at: new Date().toISOString() }
     if (expectedUpdatedAt === null) {
       const { error } = await supabase.from('autonym_store').insert(row)
       if (!error) return 'ok'
@@ -127,7 +135,7 @@ export async function saveStoreToCloud(
     const { data, error } = await supabase
       .from('autonym_store')
       .update({ data: row.data, updated_at: row.updated_at })
-      .eq('id', 'default')
+      .eq('id', userId)
       .eq('updated_at', expectedUpdatedAt)
       .select('id')
     if (error) {
@@ -143,7 +151,7 @@ export async function saveStoreToCloud(
 
 export async function uploadAvatarToCloud(dataUrlOrBlob: string | Blob, fileName: string): Promise<string | null> {
   const supabase = getSupabase()
-  if (!supabase) return null
+  if (!supabase || !userId) return null
 
   try {
     let blob: Blob
@@ -190,14 +198,14 @@ export async function uploadAvatarToCloud(dataUrlOrBlob: string | Blob, fileName
 
 export function subscribeToCloudChanges(onRemoteUpdate: (remoteStore: Store) => void): () => void {
   const supabase = getSupabase()
-  if (!supabase) return () => {}
+  if (!supabase || !userId) return () => {}
 
   try {
     const channel = supabase
       .channel('autonym_store_sync')
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'autonym_store', filter: 'id=eq.default' },
+        { event: '*', schema: 'public', table: 'autonym_store', filter: `id=eq.${userId}` },
         (payload: any) => {
           if (payload.new && payload.new.data) {
             onRemoteUpdate(payload.new.data as Store)
