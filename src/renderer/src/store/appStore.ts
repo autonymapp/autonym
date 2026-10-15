@@ -23,10 +23,6 @@ interface AppState {
   escapeHandlers: (() => void)[]
   pushEscapeHandler: (fn: () => void) => void
   popEscapeHandler: (fn: () => void) => void
-  /** Whether the first-run/replayable nav tour (see TourOverlay.tsx) is currently showing. */
-  tourOpen: boolean
-  openTour: () => void
-  closeTour: () => void
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -43,8 +39,5 @@ export const useAppStore = create<AppState>((set, get) => ({
   escapeHandlers: [],
   pushEscapeHandler: (fn) => set({ escapeHandlers: [...get().escapeHandlers, fn] }),
   popEscapeHandler: (fn) =>
-    set({ escapeHandlers: get().escapeHandlers.filter((h) => h !== fn) }),
-  tourOpen: false,
-  openTour: () => set({ tourOpen: true }),
-  closeTour: () => set({ tourOpen: false })
+    set({ escapeHandlers: get().escapeHandlers.filter((h) => h !== fn) })
 }))

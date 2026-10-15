@@ -10,8 +10,8 @@ vi.mock('./webStorage', () => ({
 }))
 
 vi.mock('./supabaseClient', () => ({
-  loadStoreFromCloud: vi.fn().mockResolvedValue(null),
-  saveStoreToCloud: vi.fn().mockResolvedValue(true),
+  loadStoreFromCloud: vi.fn().mockResolvedValue({ status: 'empty' }),
+  saveStoreToCloud: vi.fn().mockResolvedValue('ok'),
   uploadAvatarToCloud: vi.fn().mockResolvedValue(null),
   subscribeToCloudChanges: vi.fn().mockReturnValue(() => {})
 }))
@@ -155,5 +155,133 @@ describe('webDb — in-memory and repository logic', () => {
     const switched = messageRepo.setActiveVariant(msg.id, 0)
     expect(switched.content).toBe('Hello there.')
     expect(switched.activeVariantIndex).toBe(0)
+  })
+})
+
+function makeCharacter(id: number, name: string, extra: Record<string, unknown> = {}) {
+  return {
+    id,
+    name,
+    avatarType: 'monogram',
+    avatarPath: null,
+    avatarEmoji: null,
+    universeId: null,
+    baseCharacterId: null,
+    isWorldbuildingAssistant: false,
+    tags: [],
+    appearance: '',
+    personality: '',
+    speechStyle: '',
+    background: '',
+    relationships: '',
+    scenario: '',
+    firstMessage: '',
+    notes: '',
+    createdAt: '2026-10-01T00:00:00.000Z',
+    deletedAt: null,
+    ...extra
+  }
+}
+
+describe('webDb — startup never destroys user data', () => {
+  beforeEach(() => {
+    vi.resetModules()
+    vi.useRealTimers()
+  })
+
+  it('never uploads while the cloud copy cannot be read', async () => {
+    vi.useFakeTimers()
+    const cloud = await import('./supabaseClient')
+    vi.mocked(cloud.loadStoreFromCloud).mockResolvedValue({ status: 'error' })
+    vi.mocked(cloud.saveStoreToCloud).mockClear()
+
+    const { initDb, characterRepo } = await import('./webDb')
+    await initDb()
+    characterRepo.create({ ...makeCharacter(0, 'Offline Edit') } as any)
+    await vi.advanceTimersByTimeAsync(5000)
+
+    expect(cloud.saveStoreToCloud).not.toHaveBeenCalled()
+    vi.mocked(cloud.loadStoreFromCloud).mockResolvedValue({ status: 'empty' })
+  })
+
+  it('still uploads when the cloud was reached but is empty', async () => {
+    vi.useFakeTimers()
+    const cloud = await import('./supabaseClient')
+    vi.mocked(cloud.loadStoreFromCloud).mockResolvedValueOnce({ status: 'empty' })
+    vi.mocked(cloud.saveStoreToCloud).mockClear()
+
+    const { initDb } = await import('./webDb')
+    await initDb()
+    await vi.advanceTimersByTimeAsync(5000)
+
+    expect(cloud.saveStoreToCloud).toHaveBeenCalled()
+  })
+
+  it('removes only the legacy seed characters and keeps everything else', async () => {
+    const cloud = await import('./supabaseClient')
+    const { emptyStore } = await import('./webDb')
+    const stored = {
+      ...emptyStore(),
+      nextId: 10,
+      characters: [makeCharacter(1, 'Nym', { tags: ['tutorial'] })],
+      personas: [{ id: 2, name: 'Me', description: '', createdAt: '2026-10-01T00:00:00.000Z' }],
+      lorebooks: [{ id: 3, name: 'My World', description: '', isCanonSetting: false, universeId: null }]
+    }
+    vi.mocked(cloud.loadStoreFromCloud).mockResolvedValueOnce({ status: 'ok', store: stored as any })
+
+    const { initDb } = await import('./webDb')
+    await initDb()
+    const { store: after } = await import('./webDb')
+
+    expect(after.characters).toHaveLength(0)
+    expect(after.personas).toHaveLength(1)
+    expect(after.lorebooks).toHaveLength(1)
+    expect(after.seedCleanupDone).toBe(true)
+  })
+
+  it('does not touch a user-tagged "tutorial" character or a later character named Wren', async () => {
+    const cloud = await import('./supabaseClient')
+    const { emptyStore } = await import('./webDb')
+    const stored = {
+      ...emptyStore(),
+      nextId: 10,
+      seedCleanupDone: true,
+      characters: [makeCharacter(1, 'Wren'), makeCharacter(2, 'Teacher', { tags: ['tutorial'] })]
+    }
+    vi.mocked(cloud.loadStoreFromCloud).mockResolvedValueOnce({ status: 'ok', store: stored as any })
+
+    const { initDb } = await import('./webDb')
+    await initDb()
+    const { store: after } = await import('./webDb')
+
+    expect(after.characters.map((c) => c.name).sort()).toEqual(['Teacher', 'Wren'])
+  })
+
+  it('merges another device\'s changes instead of overwriting them when uploading', async () => {
+    vi.useFakeTimers()
+    const cloud = await import('./supabaseClient')
+    const { emptyStore } = await import('./webDb')
+    const phoneCopy = {
+      ...emptyStore(),
+      nextId: 2,
+      characters: [makeCharacter(1, 'Made on Phone')],
+      seedCleanupDone: true,
+      syncMeta: { stamps: { characters: { '1': '2026-10-15T10:00:00.000Z' } }, tombstones: {} }
+    }
+    vi.mocked(cloud.loadStoreFromCloud)
+      .mockResolvedValueOnce({ status: 'empty' }) // startup on the PC
+      .mockResolvedValue({ status: 'ok', store: phoneCopy as any, updatedAt: '2026-10-15T10:00:00Z' })
+    vi.mocked(cloud.saveStoreToCloud).mockClear()
+
+    const { initDb, characterRepo } = await import('./webDb')
+    await initDb()
+    characterRepo.create({ ...makeCharacter(0, 'Made on PC') } as any)
+    await vi.advanceTimersByTimeAsync(5000)
+
+    const uploads = vi.mocked(cloud.saveStoreToCloud).mock.calls
+    const last = uploads[uploads.length - 1]
+    expect(last[0].characters.map((c) => c.name).sort()).toEqual(['Made on PC', 'Made on Phone'])
+    expect(last[1]).toBe('2026-10-15T10:00:00Z')
+    expect(characterRepo.list().map((c) => c.name).sort()).toEqual(['Made on PC', 'Made on Phone'])
   })
 })

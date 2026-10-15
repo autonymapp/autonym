@@ -16,7 +16,6 @@ import {
 import { useAppStore } from './store/appStore'
 import type { Page } from './store/appStore'
 import AutonymMark from './components/AutonymMark'
-import TourOverlay from './components/TourOverlay'
 import HomePage from './pages/Home'
 import CharactersPage from './pages/Characters'
 import LorebooksPage from './pages/Lorebooks'
@@ -38,14 +37,12 @@ const NAV_ITEMS: { page: Page; label: string; icon: LucideIcon }[] = [
 const NAV_COLLAPSED_KEY = 'autonym:navCollapsed'
 
 function NavButton({
-  page,
   label,
   icon: Icon,
   active,
   collapsed,
   onClick
 }: {
-  page: Page
   label: string
   icon: LucideIcon
   active: boolean
@@ -57,7 +54,6 @@ function NavButton({
       className={`nav-link${active ? ' active' : ''}`}
       onClick={onClick}
       title={collapsed ? label : undefined}
-      data-tour={page}
       style={collapsed ? { justifyContent: 'center', paddingLeft: 0, paddingRight: 0 } : undefined}
     >
       <span className="nav-icon">
@@ -183,7 +179,6 @@ export default function App(): JSX.Element {
         {NAV_ITEMS.map((item) => (
           <NavButton
             key={item.page}
-            page={item.page}
             label={item.label}
             icon={item.icon}
             active={page === item.page}
@@ -236,7 +231,6 @@ export default function App(): JSX.Element {
         {NAV_ITEMS.map((item) => (
           <NavButton
             key={item.page}
-            page={item.page}
             label={item.label}
             icon={item.icon}
             active={page === item.page}
@@ -269,7 +263,6 @@ export default function App(): JSX.Element {
         {page === 'scenarios' && <ScenarioMakerPage />}
         {page === 'settings' && <SettingsPage />}
       </main>
-      <TourOverlay />
     </div>
   )
 }

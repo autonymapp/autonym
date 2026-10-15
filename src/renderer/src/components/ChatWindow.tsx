@@ -605,7 +605,6 @@ export default function ChatWindow({
         <div style={{ display: 'flex', gap: 8 }}>
           <AutoGrowTextarea
             ref={textareaRef}
-            data-tour="chat-input"
             rows={2}
             value={input}
             onChange={setInput}

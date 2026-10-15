@@ -297,7 +297,7 @@ export default function UniversesPage(): JSX.Element {
           <div className="empty-state">Select or create a universe.</div>
         ) : (
           <>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }} data-tour="universe-detail">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <h2 style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <Globe size={20} style={{ color: 'var(--accent)' }} /> {selected.name}
               </h2>

@@ -64,9 +64,20 @@ export function isCloudSyncEnabled(): boolean {
   return getSupabase() !== null
 }
 
-export async function loadStoreFromCloud(): Promise<Store | null> {
+/**
+ * Result of reading the cloud copy. `unavailable` means sync is off or not configured;
+ * `empty` means the cloud was reached and holds no data yet; `error` means the cloud could not
+ * be read, so its contents are unknown and must not be overwritten.
+ */
+export type CloudLoadResult =
+  | { status: 'unavailable' }
+  | { status: 'empty' }
+  | { status: 'error' }
+  | { status: 'ok'; store: Store; updatedAt: string }
+
+export async function loadStoreFromCloud(): Promise<CloudLoadResult> {
   const supabase = getSupabase()
-  if (!supabase) return null
+  if (!supabase) return { status: 'unavailable' }
 
   try {
     const { data, error } = await supabase
@@ -77,41 +88,56 @@ export async function loadStoreFromCloud(): Promise<Store | null> {
 
     if (error) {
       console.warn('Supabase fetch store warning/error:', error.message)
-      return null
+      return { status: 'error' }
     }
 
-    if (data && data.data && typeof data.data === 'object') {
-      return data.data as Store
+    if (data && data.data && typeof data.data === 'object' && (data.data as Store).nextId) {
+      return { status: 'ok', store: data.data as Store, updatedAt: data.updated_at as string }
     }
-    return null
+    return { status: 'empty' }
   } catch (err) {
     console.error('Error loading store from cloud:', err)
-    return null
+    return { status: 'error' }
   }
 }
 
-export async function saveStoreToCloud(store: Store): Promise<boolean> {
+/**
+ * Writes the store only if the cloud copy is still the one this device last read
+ * (`expectedUpdatedAt`, or null when the cloud was empty). Returns `conflict` when another device
+ * wrote in between, so the caller can merge the newer copy and try again.
+ */
+export async function saveStoreToCloud(
+  store: Store,
+  expectedUpdatedAt: string | null
+): Promise<'ok' | 'conflict' | 'error'> {
   const supabase = getSupabase()
-  if (!supabase) return false
+  if (!supabase) return 'error'
 
   try {
-    const { error } = await supabase.from('autonym_store').upsert(
-      {
-        id: 'default',
-        data: store,
-        updated_at: new Date().toISOString()
-      },
-      { onConflict: 'id' }
-    )
+    const row = { id: 'default', data: store, updated_at: new Date().toISOString() }
+    if (expectedUpdatedAt === null) {
+      const { error } = await supabase.from('autonym_store').insert(row)
+      if (!error) return 'ok'
+      // 23505 = unique violation: another device created the row first.
+      if (error.code === '23505') return 'conflict'
+      console.error('Failed to save store to Supabase:', error.message)
+      return 'error'
+    }
 
+    const { data, error } = await supabase
+      .from('autonym_store')
+      .update({ data: row.data, updated_at: row.updated_at })
+      .eq('id', 'default')
+      .eq('updated_at', expectedUpdatedAt)
+      .select('id')
     if (error) {
       console.error('Failed to save store to Supabase:', error.message)
-      return false
+      return 'error'
     }
-    return true
+    return data && data.length > 0 ? 'ok' : 'conflict'
   } catch (err) {
     console.error('Error saving store to cloud:', err)
-    return false
+    return 'error'
   }
 }
 

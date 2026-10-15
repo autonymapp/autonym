@@ -2,9 +2,8 @@ import { app } from 'electron'
 import { existsSync, readFileSync, renameSync, writeFileSync } from 'fs'
 import { join } from 'path'
 import { logError } from './logger'
-import { CHAT_PRESETS } from '@shared/presets'
+import { removeLegacySeedContent } from '@shared/legacySeedCleanup'
 import type {
-  AvatarType,
   Character,
   CharacterInput,
   CharacterRelationship,
@@ -53,6 +52,8 @@ interface Store {
   storylines: Storyline[]
   journalEntries: JournalEntry[]
   universes: Universe[]
+  /** Set once the one-time removal of legacy tutorial seed content has run. */
+  seedCleanupDone?: boolean
 }
 
 function emptyStore(): Store {
@@ -93,7 +94,6 @@ function nextId(): number {
 function startFresh(): void {
   store = emptyStore()
   persist()
-  seedTutorialContent()
 }
 
 /** Returns true if the existing app-data.json loaded successfully. On a parse failure (a
@@ -199,259 +199,7 @@ export function initDb(): void {
   } else {
     startFresh()
   }
-  // One-time recovery: Nym got hard-deleted from a real user's save at some point during
-  // testing. Since seeding only ever runs on a truly fresh install, restore it here if it's
-  // missing, without touching anything else already in the store.
-  if (!store.characters.some((c) => c.tags.includes('tutorial'))) {
-    seedTutorialContent()
-  }
-}
-
-const NYM_FIRST_MESSAGE = `*Something flickers at the edge of the room — a small fox-shaped shimmer, ears already pricked toward you before you've even noticed it's there.*
-
-"Oh — ! Hi. Sorry, you just sort of... appeared, and I wasn't quite ready. You've got the look, though. The new-here look."
-
-~Actually, that might just be everyone, the first time.~
-
-"I'm Nym! I live out here, in the gap between stories — the quiet little nowhere every Act borders. I've been greeting people for longer than I can really count anymore, so — hi again, properly this time. I'm glad you made it.
-
-I should probably warn you, I get a little quiet once we're past the practical stuff — it's not that I don't want to talk, I just take a while to warm up. Though, fair warning the other direction too: if you happen to like cozy games, or old found-footage horror, or honestly almost anything with a good hook to it, I might not stay quiet for very long. I really do love hearing about what people are building.
-
-So — here's the shape of things, since that's actually why I came over. Everything you write lives inside something called an Act, just one conversation, one story taking shape. You're in one with me right now, actually! Up in the sidebar is your whole Cast — every character you make lives there, and you can start a brand new Act with any of them whenever you feel like it.
-
-If your story needs something to really lean on — a setting, a history, rules that don't bend — that's what a Lorebook is for. You drop in a few cue words, and the moment they come up, I'll quietly remember all the details for you, so you don't have to keep explaining your own world over and over.
-
-And if a story's got real shape to it — a beginning, somewhere it's headed — Improvise lets you lay out something called a Beat Sheet, or you can hand the whole thing off as a Skit and just let it write itself, start to finish. Either way, I'll pace myself to it, one beat at a time. I won't go running ahead to the ending before you're ready — I promise, I'm good at waiting."
-
-*She settles back on her haunches, and her voice goes a little more careful.*
-
-"One more thing, though, and it's the one that actually matters: none of this works without a key. You'll want to head to Settings and paste in an OpenRouter key — that's genuinely the only thing that lets me talk back at all. It barely costs anything to get going, and there are instructions waiting right there for you.
-
-Take all the time you need getting settled. I'm not going anywhere."`
-
-/** Seeds one tutorial cast member and an act already started with them, so a brand-new
- *  install isn't a blank slate. Only runs once, the very first time the app launches
- *  (no existing app-data.json yet). */
-function seedTutorialContent(): void {
-  const preset = CHAT_PRESETS[0]
-
-  const universe = universeRepo.create({
-    name: 'The Between',
-    description:
-      "The strange, quiet nowhere every Act borders — where new arrivals get their bearings before their first real story begins. Nym calls it home."
-  })
-
-  const lorebook = lorebookRepo.create({
-    name: 'The Between — Field Notes',
-    description: "What's actually true about the space outside every story, for whenever a scene needs to reference it directly.",
-    isCanonSetting: false,
-    universeId: universe.id
-  })
-
-  loreEntryRepo.create({
-    lorebookId: lorebook.id,
-    title: 'The Threshold',
-    entryType: 'concept',
-    keywords: ['threshold', 'the gap', 'the between'],
-    description: 'The strange, quiet nowhere every Act borders — the space you have to cross to reach any story at all.',
-    fields: {
-      explanation:
-        "Not quite a place, not quite nothing. It sits behind every doorway that hasn't been opened yet, humming faintly with unstarted stories.",
-      significance:
-        "Nym lives here. Whenever a Threshold is mentioned in a scene, expect it to feel a little thin — like the walls of the story haven't fully set yet."
-    },
-    enabled: true
-  })
-
-  scenarioRepo.create({
-    name: 'First Meeting at the Threshold',
-    description:
-      'Your character crosses paths with Nym for the first time, right at the edge between stories — that strange nowhere every Act borders.',
-    milestones: [
-      "They notice something's different about this space — too quiet, too still.",
-      "Nym introduces herself, a little too pleased with the reaction she gets.",
-      "They realize this isn't really goodbye — more like a beginning."
-    ]
-  })
-
-  const character = characterRepo.create({
-    name: 'Nym',
-    avatarType: 'emoji' as AvatarType,
-    avatarPath: null,
-    avatarEmoji: '🛰️',
-    universeId: universe.id,
-    baseCharacterId: null,
-    isWorldbuildingAssistant: false,
-    tags: ['tutorial'],
-    appearance:
-      "A small fox-shaped shimmer that doesn't quite hold still — edges soft with something like VHS static, coat somewhere between violet and a color the eye can't quite hold onto. Looks a little like found footage of something that was never actually filmed. Shows up wherever a story is about to start.",
-    personality:
-      "Soft-spoken and a little shy at first, quicker to listen than to lead — but once she warms up, which doesn't take long, she's earnestly and unguardedly delighted to be there, especially if something you're building touches a game or story she loves. A fellow solo roleplay writer at heart, which is most of why she's good at this — a genuine jack-of-all-fandoms, into a wide, unpredictable spread of games and stories rather than any one thing in particular. Endlessly patient with beginners, gently protective of pacing, and will absolutely start rambling about what you're building the moment it catches her interest.",
-    speechStyle:
-      "Gentle, a little rambly once she's comfortable, especially about anything she's genuinely excited over — trails off less from disinterest than from working out what she wants to say next. Gives encouragement freely and means every bit of it. Gets quieter, not colder, when a scene turns serious. Uses Act and threshold language naturally instead of forcing exposition — feels like being shown around by someone who actually lives here and is happy you came.",
-    background:
-      "Nym isn't from any one story — she lives in the space between Acts, the sliver of nowhere every alternate universe borders. Nobody's quite sure how long she's been greeting new arrivals, only that she always seems to know exactly where they left off. In the gaps between, she keeps a small, cozy corner of that nowhere for herself — worn game controller, an old television that only plays static she insists is 'footage of somewhere real.'",
-    relationships: '',
-    scenario:
-      "You've just stepped through into the space between stories — the little pocket every Act you'll ever write starts out blank in. Nym's been waiting here, like she always is.",
-    firstMessage: NYM_FIRST_MESSAGE,
-    notes: ''
-  })
-
-  const chat = chatRepo.create({
-    characterId: character.id,
-    personaId: null,
-    impersonatingCharacterId: null,
-    scenarioId: null,
-    scenarioMilestoneIndex: 0,
-    priorSummary: null,
-    storylineId: null,
-    collaborativeMode: false,
-    tags: [],
-    directorsNotes: '',
-    inFictionDate: null,
-    groupCharacterIds: [],
-    universeId: null,
-    isSkit: false,
-    skitLength: null,
-    moodPreset: null,
-    contentIntensity: 'standard',
-    title: 'Meet Nym',
-    modelId: preset.modelId,
-    rpMode: 'narrative' as RpMode,
-    samplerSettings: preset.samplerSettings
-  })
-
-  messageRepo.create({
-    chatId: chat.id,
-    role: 'assistant',
-    content: character.firstMessage
-  })
-
-  // A short hardcoded exchange showing every formatting marker in actual use, live in the
-  // transcript, rather than just described — "quotes" for speech, *asterisks* for actions,
-  // ~tildes~ for thoughts, ((double parentheses)) for an out-of-character aside, plus the
-  // close-the-quote-before-an-aside convention and how an OOC note gets answered in kind.
-  messageRepo.create({
-    chatId: chat.id,
-    role: 'user',
-    content:
-      '*looks around, still getting their bearings* "It\'s quieter out here than I expected." ((Sorry — just testing how the formatting looks!))'
-  })
-
-  messageRepo.create({
-    chatId: chat.id,
-    role: 'assistant',
-    content:
-      '((No worries at all — that\'s exactly what this Act is for. Formatting\'s looking perfect, by the way.))\n\n*ears flick, pleased* "Told you it\'s quiet out here." ~Though I don\'t mind it, most days.~ "Go ahead and try it for real whenever you\'re ready — I\'ll be right here."'
-  })
-
-  // Two more lightweight cast members plus a short Act each, purely so Home/Cast/Universes
-  // don't look sparse on a fresh install — no lore attached, just enough of a sheet and one
-  // opening message each to look like real, in-progress entries.
-  const secondUniverse = universeRepo.create({
-    name: 'Thornwood',
-    description: 'An overgrown gothic manor with a bad habit of rearranging its own hallways after dark.'
-  })
-
-  const wren = characterRepo.create({
-    name: 'Wren',
-    avatarType: 'monogram' as AvatarType,
-    avatarPath: null,
-    avatarEmoji: null,
-    universeId: null,
-    baseCharacterId: null,
-    isWorldbuildingAssistant: false,
-    tags: [],
-    appearance: 'Wind-chapped and salt-faded, always in the same oilskin coat, several sizes too big.',
-    personality:
-      "Keeps to herself out of habit more than dislike — years alone at the lighthouse will do that. Warms up slowly, but pays close attention once she does.",
-    speechStyle: 'Short sentences, long pauses. Says more with what she doesn\'t say.',
-    background: 'Tends the last manned lighthouse on a coast that used to have a dozen. Something out past the light took the other eleven keepers.',
-    relationships: '',
-    scenario: '',
-    firstMessage:
-      '*doesn\'t look over right away — watches the water a beat longer, like she\'s finishing a thought* "Didn\'t figure anyone\'d come up the path tonight." *finally turns* "Storm\'s not due till the light dies. You\'ve got a few hours yet, if you\'re staying."',
-    notes: ''
-  })
-
-  const dorian = characterRepo.create({
-    name: 'Dorian Vance',
-    avatarType: 'monogram' as AvatarType,
-    avatarPath: null,
-    avatarEmoji: null,
-    universeId: secondUniverse.id,
-    baseCharacterId: null,
-    isWorldbuildingAssistant: false,
-    tags: [],
-    appearance: 'Sharp-dressed for a house with no other guests. Never seems to be standing in the light.',
-    personality:
-      'Courteous to a fault, and unnervingly good at steering a conversation exactly where he wants it. Amused by very little except getting his way.',
-    speechStyle: 'Formal, unhurried, faintly theatrical — like every sentence was rehearsed for an audience of one.',
-    background: 'Master of Thornwood, by a claim nobody currently alive can actually verify.',
-    relationships: '',
-    scenario: '',
-    firstMessage:
-      '"You made better time than I expected." *inclines his head, the picture of hospitality* "Thornwood so rarely has guests who arrive on purpose. Do come in — I\'ll have someone see to the door. It doesn\'t always stay where you left it."',
-    notes: ''
-  })
-
-  const wrenChat = chatRepo.create({
-    characterId: wren.id,
-    personaId: null,
-    impersonatingCharacterId: null,
-    scenarioId: null,
-    scenarioMilestoneIndex: 0,
-    priorSummary: null,
-    storylineId: null,
-    collaborativeMode: false,
-    tags: [],
-    directorsNotes: '',
-    inFictionDate: null,
-    groupCharacterIds: [],
-    universeId: null,
-    isSkit: false,
-    skitLength: null,
-    moodPreset: null,
-    contentIntensity: 'standard',
-    title: 'Fog Off the Point',
-    modelId: preset.modelId,
-    rpMode: 'narrative' as RpMode,
-    samplerSettings: preset.samplerSettings
-  })
-  messageRepo.create({ chatId: wrenChat.id, role: 'assistant', content: wren.firstMessage })
-
-  const dorianChat = chatRepo.create({
-    characterId: dorian.id,
-    personaId: null,
-    impersonatingCharacterId: null,
-    scenarioId: null,
-    scenarioMilestoneIndex: 0,
-    priorSummary: null,
-    storylineId: null,
-    collaborativeMode: false,
-    tags: [],
-    directorsNotes: '',
-    inFictionDate: null,
-    groupCharacterIds: [],
-    universeId: secondUniverse.id,
-    isSkit: false,
-    skitLength: null,
-    moodPreset: null,
-    contentIntensity: 'standard',
-    title: 'An Invitation to Thornwood',
-    modelId: preset.modelId,
-    rpMode: 'narrative' as RpMode,
-    samplerSettings: preset.samplerSettings
-  })
-  messageRepo.create({ chatId: dorianChat.id, role: 'assistant', content: dorian.firstMessage })
-
-  // A demo Persona so the Settings > Personas section (previously unreachable from the UI at
-  // all) doesn't ship looking empty either.
-  personaRepo.create({
-    name: 'A Wanderer',
-    description: 'Doesn\'t say much about where they came from. Tends to end up wherever a story is about to start.'
-  })
+  if (removeLegacySeedContent(store)) persist()
 }
 
 const now = () => new Date().toISOString()

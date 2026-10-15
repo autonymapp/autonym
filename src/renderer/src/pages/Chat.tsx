@@ -1276,7 +1276,6 @@ export default function ChatPage(): JSX.Element {
                 <div style={{ display: 'flex', gap: 6, flexShrink: 0, position: 'relative' }}>
                   <button
                     className="btn btn-sm"
-                    data-tour="chat-story-tools-btn"
                     onClick={() => setToolsMenuOpen((o) => !o)}
                     disabled={continuing || forking || journaling || extractingCharacter}
                   >
@@ -1359,7 +1358,7 @@ export default function ChatPage(): JSX.Element {
                       )}
                     </div>
                   )}
-                  <button className="btn btn-sm" data-tour="chat-model-settings-btn" onClick={() => setShowSettings((s) => !s)}>
+                  <button className="btn btn-sm" onClick={() => setShowSettings((s) => !s)}>
                     {showSettings ? (
                       'Hide Settings'
                     ) : (

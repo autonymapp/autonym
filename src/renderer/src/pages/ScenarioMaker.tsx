@@ -202,11 +202,10 @@ export default function ScenarioMakerPage(): JSX.Element {
         <div className="empty-state">No scenarios yet. Create one to get started.</div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 14 }}>
-          {scenarios.map((s, i) => (
+          {scenarios.map((s) => (
             <div
               key={s.id}
               className="card"
-              data-tour={i === 0 ? 'scenario-card' : undefined}
               onContextMenu={(e) => {
                 e.preventDefault()
                 setScenarioContextMenu({ scenarioId: s.id, x: e.clientX, y: e.clientY })
@@ -263,7 +262,6 @@ export default function ScenarioMakerPage(): JSX.Element {
         {!creatingSkit && (
           <button
             className="btn btn-primary btn-sm"
-            data-tour="skits-new-btn"
             onClick={() => setCreatingSkit(true)}
             disabled={characters.length === 0}
             style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}

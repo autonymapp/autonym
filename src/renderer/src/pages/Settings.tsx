@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import { Check, Cloud, Code2, Compass, Download, ExternalLink, Pencil, Plus, RefreshCw, Trash2, Upload } from 'lucide-react'
+import { Check, Cloud, Code2, Download, ExternalLink, Pencil, Plus, RefreshCw, Trash2, Upload } from 'lucide-react'
 import type { Persona } from '@shared/types'
 import { getStoredSupabaseConfig, saveSupabaseConfig, clearSupabaseConfig } from '../../../web/supabaseClient'
 import { useConfirm } from '../components/ConfirmDialog'
 import AutoGrowTextarea from '../components/AutoGrowTextarea'
-import { useAppStore } from '../store/appStore'
 import {
   applyAccent,
   applyBoldFormatting,
@@ -59,7 +58,6 @@ const SECTIONS: { id: string; label: string }[] = [
 ]
 
 export default function SettingsPage(): JSX.Element {
-  const { openTour } = useAppStore()
   const [profileName, setProfileNameState] = useState(getStoredProfileName())
   const [hasKey, setHasKey] = useState(false)
   const [keyInput, setKeyInput] = useState('')
@@ -775,13 +773,6 @@ export default function SettingsPage(): JSX.Element {
           raw AI chat for roleplay and story-writing. Free and open-source under the MIT license.
         </p>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
-          <button
-            className="btn btn-sm"
-            onClick={openTour}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
-          >
-            <Compass size={14} /> Take the Tour
-          </button>
           <button
             className="btn btn-sm"
             onClick={() => window.api.app.openExternal('https://github.com/autonymapp/autonym')}
