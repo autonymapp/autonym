@@ -1,11 +1,13 @@
-const CACHE_NAME = 'autonym-cache-v1'
+const CACHE_NAME = 'autonym-cache-v2'
 
 const PRECACHE_URLS = [
   './',
   './index.html',
   './manifest.webmanifest',
   './favicon.svg',
-  './icon-512.png'
+  './icon-192.png',
+  './icon-512.png',
+  './icon-maskable-512.png'
 ]
 
 // Service Worker Install

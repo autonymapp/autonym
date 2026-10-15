@@ -798,29 +798,29 @@ export default function SettingsPage(): JSX.Element {
         </div>
         {updateStatus && <p className="hint" style={{ marginBottom: 12 }}>{updateStatus}</p>}
         <p className="hint" style={{ margin: 0 }}>
-          Headers set in{' '}
+          Interface set in{' '}
           <span
             role="button"
             tabIndex={0}
-            onClick={() => window.api.app.openExternal('https://fonts.google.com/specimen/Fredoka')}
+            onClick={() => window.api.app.openExternal('https://fonts.google.com/specimen/Instrument+Sans')}
             onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') window.api.app.openExternal('https://fonts.google.com/specimen/Fredoka')
+              if (e.key === 'Enter' || e.key === ' ') window.api.app.openExternal('https://fonts.google.com/specimen/Instrument+Sans')
             }}
             style={{ textDecoration: 'underline', cursor: 'pointer', color: 'var(--text)' }}
           >
-            Fredoka
+            Instrument Sans
           </span>
-          , body text in{' '}
+          , story text in{' '}
           <span
             role="button"
             tabIndex={0}
-            onClick={() => window.api.app.openExternal('https://fonts.google.com/specimen/Manrope')}
+            onClick={() => window.api.app.openExternal('https://fonts.google.com/specimen/Atkinson+Hyperlegible')}
             onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') window.api.app.openExternal('https://fonts.google.com/specimen/Manrope')
+              if (e.key === 'Enter' || e.key === ' ') window.api.app.openExternal('https://fonts.google.com/specimen/Atkinson+Hyperlegible')
             }}
             style={{ textDecoration: 'underline', cursor: 'pointer', color: 'var(--text)' }}
           >
-            Manrope
+            Atkinson Hyperlegible
           </span>
           , courtesy of Google Fonts (SIL Open Font License).
         </p>

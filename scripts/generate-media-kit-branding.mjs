@@ -9,7 +9,7 @@ import { Resvg } from '@resvg/resvg-js'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const root = join(__dirname, '..')
 const svgPath = join(root, 'src/renderer/public/favicon.svg')
-const fontPath = join(root, 'src/renderer/src/assets/fonts/Fredoka-Bold.ttf')
+const fontPath = join(root, 'src/renderer/src/assets/fonts/InstrumentSans-Bold.ttf')
 const outDir = join(root, 'press/branding')
 
 mkdirSync(outDir, { recursive: true })
@@ -20,29 +20,25 @@ const iconSvg = readFileSync(svgPath, 'utf-8')
 for (const size of [512, 1024]) {
   const resvg = new Resvg(iconSvg, {
     fitTo: { mode: 'width', value: size },
-    font: { fontFiles: [fontPath], loadSystemFonts: false, defaultFontFamily: 'Fredoka' }
+    font: { fontFiles: [fontPath], loadSystemFonts: false, defaultFontFamily: 'Instrument Sans' }
   })
   writeFileSync(join(outDir, `icon-${size}.png`), resvg.render().asPng())
 }
 
-// Standalone wordmark — "Autonym" plus the same quiet trailing dot the sidebar lockup uses,
-// set in Fredoka Bold, transparent background, in both a dark-text (for light backgrounds) and
-// white-text (for dark backgrounds) variant.
-function wordmarkSvg(color, dotColor) {
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="760" height="200" viewBox="0 0 760 200">
-  <text x="16" y="148" font-family="'Fredoka'" font-weight="700" font-size="130" fill="${color}">Autonym</text>
-  <circle cx="730" cy="140" r="9" fill="${dotColor}" />
+// Standalone wordmark — "Autonym" set in Instrument Sans Bold like the sidebar lockup,
+// transparent background, in both a dark-text (for light backgrounds) and white-text (for dark
+// backgrounds) variant.
+function wordmarkSvg(color) {
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="700" height="200" viewBox="0 0 700 200">
+  <text x="16" y="148" font-family="'Instrument Sans'" font-weight="700" font-size="130" fill="${color}">Autonym</text>
 </svg>`
 }
 
-const variants = {
-  dark: { text: '#14151a', dot: '#6b7280' },
-  white: { text: '#ffffff', dot: '#9aa0ad' }
-}
-for (const [name, { text, dot }] of Object.entries(variants)) {
-  const resvg = new Resvg(wordmarkSvg(text, dot), {
+const variants = { dark: '#131418', white: '#ffffff' }
+for (const [name, text] of Object.entries(variants)) {
+  const resvg = new Resvg(wordmarkSvg(text), {
     fitTo: { mode: 'width', value: 1800 },
-    font: { fontFiles: [fontPath], loadSystemFonts: false, defaultFontFamily: 'Fredoka' }
+    font: { fontFiles: [fontPath], loadSystemFonts: false, defaultFontFamily: 'Instrument Sans' }
   })
   writeFileSync(join(outDir, `wordmark-${name}.png`), resvg.render().asPng())
 }

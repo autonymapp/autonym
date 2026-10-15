@@ -124,12 +124,12 @@ export default function App(): JSX.Element {
           <AutonymMark size={22} />
           <span
             style={{
-              fontFamily: "'Fredoka', 'Century Gothic', 'Poppins', 'Segoe UI', sans-serif",
+              fontFamily: 'var(--font-ui)',
               fontWeight: 700,
               fontSize: 16
             }}
           >
-            autonym
+            Autonym
           </span>
         </div>
         <div style={{ flex: 1 }} />
@@ -158,12 +158,12 @@ export default function App(): JSX.Element {
             <AutonymMark size={24} />
             <span
               style={{
-                fontFamily: "'Fredoka', 'Century Gothic', 'Poppins', 'Segoe UI', sans-serif",
+                fontFamily: 'var(--font-ui)',
                 fontWeight: 700,
                 fontSize: 18
               }}
             >
-              autonym<span style={{ color: 'var(--text-faint)' }}>.</span>
+              Autonym
             </span>
           </div>
           <button
@@ -220,11 +220,11 @@ export default function App(): JSX.Element {
           {!navCollapsed && (
             <span
               style={{
-                fontFamily: "'Fredoka', 'Century Gothic', 'Poppins', 'Segoe UI', sans-serif",
+                fontFamily: 'var(--font-ui)',
                 letterSpacing: '0.01em'
               }}
             >
-              autonym<span style={{ color: 'var(--text-faint)' }}>.</span>
+              Autonym
             </span>
           )}
         </div>

@@ -1,52 +1,87 @@
 @font-face {
-  font-family: 'Fredoka';
-  src: url('../assets/fonts/Fredoka.ttf') format('truetype-variations');
-  font-weight: 300 700;
+  font-family: 'Instrument Sans';
+  src: url('../assets/fonts/InstrumentSans.woff2') format('woff2');
+  font-weight: 400 700;
   font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
-  font-family: 'Manrope';
-  src: url('../assets/fonts/Manrope.woff2') format('woff2-variations');
-  font-weight: 200 800;
+  font-family: 'Instrument Sans';
+  src: url('../assets/fonts/InstrumentSans-Italic.woff2') format('woff2');
+  font-weight: 400 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Atkinson Hyperlegible';
+  src: url('../assets/fonts/AtkinsonHyperlegible-400-normal.woff2') format('woff2');
+  font-weight: 400;
   font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Atkinson Hyperlegible';
+  src: url('../assets/fonts/AtkinsonHyperlegible-400-italic.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Atkinson Hyperlegible';
+  src: url('../assets/fonts/AtkinsonHyperlegible-700-normal.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Atkinson Hyperlegible';
+  src: url('../assets/fonts/AtkinsonHyperlegible-700-italic.woff2') format('woff2');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
 }
 
 :root {
   color-scheme: dark;
-  /* The default theme — a deep-space palette: near-black with a violet undertone, a
-     signal-violet accent, and a cyan secondary (avatars, thought-text, badges) — distinct
-     enough from the accent to read as a real second color, not just "more purple", while
-     still landing as a classic violet/cyan nebula pairing. */
-  --bg: #0b0a13;
-  --bg-elevated: #14121f;
-  --bg-hover: #1d1a2e;
-  --bg-sunken: #08070f;
-  --border: #2a2740;
-  --border-soft: #201d33;
-  --text: #eae7f6;
-  --text-dim: #b3aecb;
-  --text-faint: #8d87a8;
-  --accent: #9b93ff;
-  --accent-hover: #8078e8;
-  --accent-soft: rgba(155, 147, 255, 0.14);
-  --accent-contrast: var(--bg);
-  --accent-2: #3ec9e0;
+  /* The default theme: neutral graphite with a soft blue accent. No theme or metaphor; the
+     personality comes from the type and the two-bubble mark. --accent-2 is a soft violet for
+     avatars, thought-text and badges, distinct from the accent without competing with it. */
+  --bg: #131418;
+  --bg-elevated: #1c1e24;
+  --bg-hover: #24272f;
+  --bg-sunken: #0e0f12;
+  --border: #2e313a;
+  --border-soft: #24272f;
+  --text: #e9eaf0;
+  --text-dim: #b4b6c2;
+  --text-faint: #9497a6;
+  --accent: #7fb2ff;
+  --accent-hover: #6a9fef;
+  --accent-soft: rgba(127, 178, 255, 0.14);
+  --accent-contrast: #0d1626;
+  --accent-2: #c9a0ff;
   --danger: #f0637a;
   --danger-soft: rgba(240, 99, 122, 0.14);
   --success: #4fd1a5;
   --radius-sm: 7px;
-  --radius-md: 12px;
-  --radius-lg: 18px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35);
   --ease: 150ms cubic-bezier(0.2, 0, 0, 1);
-  --chat-font-family: inherit;
+  --font-ui: 'Instrument Sans', 'Segoe UI', -apple-system, Roboto, Helvetica, Arial, sans-serif,
+    'Apple Color Emoji', 'Segoe UI Emoji';
+  --font-story: 'Atkinson Hyperlegible', 'Segoe UI', -apple-system, Roboto, Helvetica, Arial,
+    sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+  --chat-font-family: var(--font-story);
   --chat-font-size: 15px;
   --chat-line-height: 1.6;
-  font-family:
-    'Manrope', 'Segoe UI', -apple-system, Roboto, Helvetica, Arial, sans-serif,
-    'Apple Color Emoji', 'Segoe UI Emoji';
+  font-family: var(--font-ui);
 }
 
 /* ---------- Accessibility overrides ---------- */
