@@ -29,6 +29,7 @@ import type {
 import { removeLegacySeedContent } from '@shared/legacySeedCleanup'
 import { loadLocalStore, saveLocalStore } from './webStorage'
 import { loadStoreFromCloud, saveStoreToCloud, subscribeToCloudChanges } from './supabaseClient'
+import { buildBaseline, mergeStores, stampChanges, type Baseline, type SyncMeta } from './syncMerge'
 
 export interface CharacterLorebookLink {
   characterId: number
@@ -52,6 +53,8 @@ export interface Store {
   universes: Universe[]
   /** Set once the one-time removal of legacy tutorial seed content has run. */
   seedCleanupDone?: boolean
+  /** Per-record change times used to merge this store with other devices' copies. */
+  syncMeta?: SyncMeta
 }
 
 export function emptyStore(): Store {
@@ -102,23 +105,104 @@ export function setStore(newStore: Store, shouldPersist = true): void {
   notifyChange()
 }
 
-let cloudSyncTimeout: any = null
-// False when the cloud copy couldn't be read at startup: its contents are unknown, so uploading
-// this device's store could overwrite newer data. Re-enabled once the cloud is heard from again.
-let cloudUploadsAllowed = true
+let syncTimer: ReturnType<typeof setTimeout> | null = null
+let syncing = false
+let syncRequested = false
+// Serialized records as of the last stamp, used to find which records changed since.
+let baseline: Baseline = new Map()
+// Bumped on every local save, so a sync can tell whether edits landed while it was uploading.
+let localVersion = 0
 
 export function persist(): void {
+  localVersion++
   saveLocalStore(store)
-
-  if (!cloudUploadsAllowed) return
-  if (cloudSyncTimeout) clearTimeout(cloudSyncTimeout)
-  cloudSyncTimeout = setTimeout(() => {
-    saveStoreToCloud(store).catch((err) => console.warn('Supabase cloud sync failed:', err))
-  }, 1000)
+  scheduleSync()
 }
 
+function scheduleSync(delayMs = 1000): void {
+  if (syncTimer) clearTimeout(syncTimer)
+  syncTimer = setTimeout(() => {
+    syncTimer = null
+    syncNow().catch((err) => console.warn('Supabase cloud sync failed:', err))
+  }, delayMs)
+}
+
+/** Records local edits as dated changes, so they survive a merge with another device's copy. */
+function stampLocalEdits(): void {
+  baseline = stampChanges(store, baseline)
+}
+
+/**
+ * Uploads this device's changes: reads the cloud copy, merges it record by record with the
+ * local store, and writes the result only if nobody else wrote in between (retrying if they did).
+ */
+export async function syncNow(): Promise<void> {
+  if (syncing) {
+    syncRequested = true
+    return
+  }
+  syncing = true
+  let retryLater = false
+  try {
+    stampLocalEdits()
+    if (!store.syncMeta?.pending) return
+    saveLocalStore(store)
+
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const cloud = await loadStoreFromCloud()
+      // Unreadable cloud: its contents are unknown, so keep changes on this device (still marked
+      // pending) and only upload after a later read succeeds.
+      if (cloud.status === 'unavailable') return
+      if (cloud.status === 'error') {
+        retryLater = true
+        return
+      }
+
+      const startVersion = localVersion
+      stampLocalEdits()
+      const merged = cloud.status === 'ok' ? mergeStores(store, backfill(cloud.store)) : store
+      const upload: Store = { ...merged, syncMeta: { ...merged.syncMeta!, pending: false } }
+      const result = await saveStoreToCloud(upload, cloud.status === 'ok' ? cloud.updatedAt : null)
+      if (result === 'error') {
+        retryLater = true
+        return
+      }
+      if (result === 'conflict') continue
+
+      if (localVersion === startVersion) {
+        store = upload
+      } else {
+        // Edits landed during the upload: keep them on top of what was uploaded and go again.
+        stampLocalEdits()
+        store = mergeStores(store, upload)
+        syncRequested = true
+      }
+      baseline = buildBaseline(store)
+      saveLocalStore(store)
+      notifyChange()
+      return
+    }
+    syncRequested = true
+  } finally {
+    syncing = false
+    if (syncRequested) {
+      syncRequested = false
+      scheduleSync()
+    } else if (retryLater) {
+      scheduleSync(30_000)
+    }
+  }
+}
+
+/**
+ * New ids start from the current time in milliseconds, so records created on two synced devices
+ * (both counting up from the same nextId while apart) don't end up with the same id. Still
+ * increasing, so sorting by id keeps creation order.
+ */
 function nextId(): number {
-  return store.nextId++
+  const id = Math.max(store.nextId, Date.now())
+  store.nextId = id + 1
+  return id
 }
 
 const now = () => new Date().toISOString()
@@ -967,38 +1051,44 @@ function backfill(raw: any): Store {
 }
 
 export async function initDb(): Promise<void> {
-  // 1. Try loading from Supabase Cloud first
   const cloud = await loadStoreFromCloud()
-  cloudUploadsAllowed = cloud.status !== 'error'
+  const localData = await loadLocalStore()
+  const local = localData && localData.nextId ? backfill(localData) : null
   if (cloud.status === 'error') {
     console.warn('Could not reach cloud sync; keeping changes on this device until it is reachable.')
   }
 
   if (cloud.status === 'ok') {
-    store = backfill(cloud.store)
-    saveLocalStore(store)
+    const remote = backfill(cloud.store)
+    // Changes this device made that never reached the cloud are merged in, not thrown away.
+    store = local?.syncMeta?.pending ? mergeStores(local, remote) : remote
   } else {
-    // 2. Otherwise try local IndexedDB
-    const localData = await loadLocalStore()
-    if (localData && localData.nextId) {
-      store = backfill(localData)
-    } else {
-      // 3. Fresh installation
-      store = emptyStore()
-      persist()
-    }
+    store = local ?? emptyStore()
+    // The cloud was reached but is empty: this device's data becomes the first cloud copy.
+    if (cloud.status === 'empty') (store.syncMeta ??= { stamps: {}, tombstones: {} }).pending = true
   }
+  baseline = buildBaseline(store)
+  saveLocalStore(store)
 
-  if (removeLegacySeedContent(store)) {
-    persist()
-  }
+  if (removeLegacySeedContent(store)) persist()
+  if (store.syncMeta?.pending) scheduleSync(0)
 
-  // 4. Subscribe to Realtime updates if Supabase is connected
   subscribeToCloudChanges((remoteStore) => {
-    console.log('Received remote store update from Supabase Realtime')
-    cloudUploadsAllowed = true
-    store = backfill(remoteStore)
+    stampLocalEdits()
+    store = mergeStores(store, backfill(remoteStore))
+    baseline = buildBaseline(store)
     saveLocalStore(store)
     notifyChange()
+    if (store.syncMeta?.pending) scheduleSync()
   })
+
+  // A PWA can be closed at any moment: date and upload pending edits as soon as it's hidden.
+  if (typeof document !== 'undefined') {
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState !== 'hidden') return
+      stampLocalEdits()
+      saveLocalStore(store)
+      if (store.syncMeta?.pending) syncNow().catch(() => {})
+    })
+  }
 }
