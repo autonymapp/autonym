@@ -608,11 +608,10 @@ export default function LorebooksPage(): JSX.Element {
             )}
 
             <div style={{ marginTop: 18, display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {entries.map((entry, i) => (
+              {entries.map((entry) => (
                 <div
                   key={entry.id}
                   className="card"
-                  data-tour={i === 0 ? 'lorebook-entry' : undefined}
                   onContextMenu={(e) => {
                     e.preventDefault()
                     setEntryContextMenu({ entryId: entry.id, x: e.clientX, y: e.clientY })

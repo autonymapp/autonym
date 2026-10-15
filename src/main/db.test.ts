@@ -35,11 +35,12 @@ afterEach(() => {
 })
 
 describe('initDb — fresh install', () => {
-  it('seeds a tutorial cast member when no app-data.json exists', async () => {
-    const { initDb, characterRepo } = await freshDb()
+  it('starts empty, with no demo content, when no app-data.json exists', async () => {
+    const { initDb, characterRepo, universeRepo, personaRepo } = await freshDb()
     initDb()
-    const characters = characterRepo.list()
-    expect(characters.some((c) => c.tags.includes('tutorial'))).toBe(true)
+    expect(characterRepo.list()).toHaveLength(0)
+    expect(universeRepo.list()).toHaveLength(0)
+    expect(personaRepo.list()).toHaveLength(0)
   })
 
   it('writes app-data.json atomically (no leftover .tmp file)', async () => {
@@ -99,11 +100,7 @@ describe('initDb — backfill/migration', () => {
       nextId: 3,
       characters: [
         { id: 1, name: 'Aria', avatarType: 'monogram', firstMessage: '', notes: '', settingTag: 'Sengoku' },
-        { id: 2, name: 'Kaoru', avatarType: 'monogram', firstMessage: '', notes: '', settingTag: 'Sengoku' },
-        // Tagged 'tutorial' so initDb's missing-tutorial-content recovery path doesn't also
-        // seed Nym (and a second Universe alongside it), which isn't what this test covers.
-        // High id, well clear of nextId, so it can't collide with anything auto-created below.
-        { id: 99, name: 'Placeholder', avatarType: 'monogram', firstMessage: '', notes: '', tags: ['tutorial'] }
+        { id: 2, name: 'Kaoru', avatarType: 'monogram', firstMessage: '', notes: '', settingTag: 'Sengoku' }
       ],
       chats: [],
       messages: [],
@@ -133,14 +130,45 @@ describe('initDb — backfill/migration', () => {
     expect((characters[0] as any).settingTag).toBeUndefined()
   })
 
+  it('removes the old demo cast once, keeping the user\'s own characters', async () => {
+    const oldStore = {
+      nextId: 10,
+      characters: [
+        { id: 1, name: 'Nym', avatarType: 'emoji', firstMessage: '', notes: '', tags: ['tutorial'] },
+        { id: 2, name: 'Kai', avatarType: 'monogram', firstMessage: '', notes: '', tags: ['tutorial'] }
+      ],
+      chats: [],
+      messages: [],
+      lorebooks: [],
+      loreEntries: [],
+      personas: [{ id: 3, name: 'A Wanderer', description: '' }],
+      characterLorebooks: [],
+      characterRelationships: [],
+      scenarios: [],
+      storylines: [],
+      customPresets: [],
+      journalEntries: [],
+      universes: []
+    }
+    writeFileSync(join(newTempUserDataDir(), 'app-data.json'), JSON.stringify(oldStore))
+
+    const { initDb, characterRepo, personaRepo } = await freshDb(true)
+    initDb()
+
+    expect(characterRepo.list().map((c) => c.name)).toEqual(['Kai'])
+    expect(personaRepo.list()).toHaveLength(0)
+    const saved = JSON.parse(readFileSync(join(userDataDir, 'app-data.json'), 'utf-8'))
+    expect(saved.seedCleanupDone).toBe(true)
+  })
+
   it('renames a corrupted app-data.json aside instead of crashing, and starts fresh', async () => {
     writeFileSync(join(newTempUserDataDir(), 'app-data.json'), '{ this is not valid json !!!')
 
     const { initDb, characterRepo } = await freshDb(true)
     expect(() => initDb()).not.toThrow()
 
-    // Started fresh (seeded tutorial content) rather than staying corrupted or empty.
-    expect(characterRepo.list().length).toBeGreaterThan(0)
+    // Started fresh (an empty, usable store) rather than staying corrupted.
+    expect(characterRepo.list()).toHaveLength(0)
     // The corrupt file was preserved aside, not silently destroyed.
     const files = readFileSync(join(userDataDir, 'app-data.json'), 'utf-8')
     expect(() => JSON.parse(files)).not.toThrow()

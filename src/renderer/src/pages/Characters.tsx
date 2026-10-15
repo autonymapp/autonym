@@ -407,7 +407,6 @@ export default function CharactersPage(): JSX.Element {
               </button>
               <button
                 className="btn btn-primary"
-                data-tour="new-character-btn"
                 onClick={() => {
                   setNewDraft(undefined)
                   setDraftedFromChat(false)
@@ -500,11 +499,10 @@ export default function CharactersPage(): JSX.Element {
             marginTop: 20
           }}
         >
-          {visibleCharacters.map((c, i) => (
+          {visibleCharacters.map((c) => (
             <div
               key={c.id}
               className="card interactive"
-              data-tour={i === 0 ? 'character-card' : undefined}
               onContextMenu={(e) => {
                 e.preventDefault()
                 setCardContextMenu({ characterId: c.id, x: e.clientX, y: e.clientY })

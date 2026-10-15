@@ -113,7 +113,7 @@ export default function HomePage(): JSX.Element {
         </div>
       )}
 
-      <div className="section-title" data-tour="home-recent-acts">Recent Chats</div>
+      <div className="section-title">Recent Chats</div>
       {recentActs.length === 0 ? (
         <div className="empty-state" style={{ marginBottom: 24 }}>
           No chats yet — select a character below to start one.
@@ -155,7 +155,7 @@ export default function HomePage(): JSX.Element {
         </div>
       )}
 
-      <div className="section-title" data-tour="home-cast">Characters</div>
+      <div className="section-title">Characters</div>
       {characters.length === 0 ? (
         <div className="empty-state">No characters yet — create or import one on the Characters page.</div>
       ) : (
