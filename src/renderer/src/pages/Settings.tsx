@@ -278,8 +278,9 @@ export default function SettingsPage(): JSX.Element {
   }
 
   return (
-    <div style={{ display: 'flex', height: '100%' }}>
+    <div className="settings-layout" style={{ display: 'flex', height: '100%' }}>
       <nav
+        className="settings-nav"
         style={{
           width: 230,
           flexShrink: 0,
@@ -303,6 +304,7 @@ export default function SettingsPage(): JSX.Element {
       <div
         ref={contentRef}
         onScroll={handleContentScroll}
+        className="settings-content"
         style={{ flex: 1, padding: '24px 28px', maxWidth: 820, height: '100%', overflowY: 'auto' }}
       >
         <h2 style={{ marginBottom: 18 }}>Settings</h2>

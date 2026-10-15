@@ -792,5 +792,36 @@ details[open] > summary .details-chevron {
     height: calc(100dvh - 48px);
     overflow: hidden;
   }
+
+  /* Settings: the section list becomes a scrolling row of chips above the content. */
+  .settings-layout {
+    flex-direction: column;
+  }
+
+  .settings-nav {
+    width: 100% !important;
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    overflow-y: hidden !important;
+    padding: 8px 12px !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--border);
+    scrollbar-width: none;
+  }
+
+  .settings-nav .sidebar-item {
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin: 0;
+    padding: 6px 12px;
+    border-left: none;
+    border-radius: 999px;
+  }
+
+  .settings-content {
+    padding: 16px !important;
+    min-height: 0;
+  }
 }
 
