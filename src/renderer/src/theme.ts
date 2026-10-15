@@ -8,7 +8,7 @@ export interface ThemeInfo {
 }
 
 export const THEMES: ThemeInfo[] = [
-  { id: 'indigo', label: 'Midnight Indigo', swatch: ['#14151a', '#1c1e25', '#8b93ff'] },
+  { id: 'indigo', label: 'Graphite', swatch: ['#131418', '#1c1e24', '#7fb2ff'] },
   { id: 'slate', label: 'Slate Blue', swatch: ['#12161c', '#1a1f28', '#5b9dff'] },
   { id: 'amber', label: 'Warm Charcoal', swatch: ['#181513', '#211c19', '#e0a34a'] },
   { id: 'oled', label: 'OLED Black', swatch: ['#000000', '#0d0f12', '#2dd4bf'] },
@@ -33,7 +33,7 @@ export function applyTheme(theme: ThemeId): void {
 }
 
 export function defaultAccentFor(theme: ThemeId): string {
-  return THEMES.find((t) => t.id === theme)?.swatch[2] ?? '#8b93ff'
+  return THEMES.find((t) => t.id === theme)?.swatch[2] ?? '#7fb2ff'
 }
 
 export function getStoredAccent(): string | null {
@@ -96,7 +96,7 @@ export type ChatTextSizeId = 'small' | 'medium' | 'large' | 'xlarge'
 export type LineSpacingId = 'compact' | 'comfortable' | 'relaxed'
 
 export const FONT_FAMILIES: { id: FontFamilyId; label: string; stack: string }[] = [
-  { id: 'default', label: 'System Default', stack: 'inherit' },
+  { id: 'default', label: 'Default (Atkinson Hyperlegible)', stack: 'var(--font-story)' },
   { id: 'serif', label: 'Serif', stack: "Georgia, Cambria, 'Times New Roman', serif" },
   { id: 'dyslexic', label: 'Dyslexia-Friendly', stack: "'Comic Sans MS', 'Comic Sans', cursive" }
 ]
@@ -126,7 +126,7 @@ export function getStoredFontFamily(): FontFamilyId {
   return FONT_FAMILIES.some((f) => f.id === stored) ? (stored as FontFamilyId) : 'default'
 }
 export function applyFontFamily(id: FontFamilyId): void {
-  const stack = FONT_FAMILIES.find((f) => f.id === id)?.stack ?? 'inherit'
+  const stack = FONT_FAMILIES.find((f) => f.id === id)?.stack ?? 'var(--font-story)'
   document.documentElement.style.setProperty('--chat-font-family', stack)
   localStorage.setItem(FONT_FAMILY_KEY, id)
 }

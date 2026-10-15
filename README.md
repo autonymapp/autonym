@@ -18,9 +18,8 @@ A structured, compendium-first desktop app for solo roleplayers and authors, bui
 
 ---
 
-Everything you'd want to know as a *user* — what Autonym does, how the Crew/Universes/Records/
-Journeys/Beacons systems fit together, and where to download it — lives at **[autonym.app](https://autonym.app)**.
-This README covers running the source and contributing.
+Autonym runs two ways: as a Windows desktop app (Electron) and as an installable web app (PWA)
+at **[autonym.app](https://autonym.app)**. This README covers running the source and contributing.
 
 ## Running from source
 
@@ -63,9 +62,11 @@ npm test
   summaries) are hardcoded to a fixed, hidden model (`CLERICAL_MODEL_ID` in
   `src/shared/presets.ts`) rather than using the Act's chosen model — quality on those tasks
   shouldn't depend on what the user picked for creative writing.
-- The marketing/landing page in `docs/` is a static site served via GitHub Pages at
-  [autonym.app](https://autonym.app) (see `docs/CNAME`) — it's independent of the app itself and
-  can be edited without touching `src/`.
+- The web app swaps the Electron bridge for a browser adapter (`src/web/`): data lives in
+  IndexedDB with optional Supabase sync, and the OpenRouter key is kept in the browser.
+- `npm run build:web` builds the PWA into `docs/`, which GitHub Pages serves at
+  [autonym.app](https://autonym.app) (see `src/renderer/public/CNAME`). `docs/` is generated:
+  rebuild and commit it rather than editing it by hand.
 
 ## License
 

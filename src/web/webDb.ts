@@ -28,7 +28,7 @@ import type {
 } from '@shared/types'
 import { removeLegacySeedContent } from '@shared/legacySeedCleanup'
 import { loadLocalStore, saveLocalStore } from './webStorage'
-import { loadStoreFromCloud, saveStoreToCloud, subscribeToCloudChanges } from './supabaseClient'
+import { loadSession, loadStoreFromCloud, saveStoreToCloud, subscribeToCloudChanges } from './supabaseClient'
 import { buildBaseline, mergeStores, stampChanges, type Baseline, type SyncMeta } from './syncMerge'
 
 export interface CharacterLorebookLink {
@@ -1050,7 +1050,17 @@ function backfill(raw: any): Store {
   return s
 }
 
+/**
+ * Called right after signing in, before the app reloads: everything on this device is queued for
+ * upload, so it is merged into the account's cloud copy instead of being replaced by it.
+ */
+export function queueLocalDataForUpload(): Promise<void> {
+  ;(store.syncMeta ??= { stamps: {}, tombstones: {} }).pending = true
+  return saveLocalStore(store)
+}
+
 export async function initDb(): Promise<void> {
+  await loadSession()
   const cloud = await loadStoreFromCloud()
   const localData = await loadLocalStore()
   const local = localData && localData.nextId ? backfill(localData) : null
