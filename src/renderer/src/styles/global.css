@@ -718,11 +718,13 @@ details[open] > summary .details-chevron {
 
 .mobile-header {
   display: none;
-  height: 48px;
+  /* The installed iPhone app draws under the status bar, so the header grows by the notch's height. */
+  height: calc(48px + env(safe-area-inset-top, 0px));
   background: var(--bg-elevated);
   border-bottom: 1px solid var(--border);
   align-items: center;
-  padding: 0 14px;
+  padding: env(safe-area-inset-top, 0px) calc(14px + env(safe-area-inset-right, 0px)) 0
+    calc(14px + env(safe-area-inset-left, 0px));
   gap: 12px;
   flex-shrink: 0;
   z-index: 100;
@@ -777,7 +779,8 @@ details[open] > summary .details-chevron {
     transition: transform 220ms cubic-bezier(0.2, 0, 0, 1);
     display: flex;
     flex-direction: column;
-    padding: 16px 12px;
+    padding: calc(16px + env(safe-area-inset-top, 0px)) 12px calc(16px + env(safe-area-inset-bottom, 0px))
+      calc(12px + env(safe-area-inset-left, 0px));
     box-shadow: var(--shadow-md);
   }
 
@@ -789,7 +792,8 @@ details[open] > summary .details-chevron {
     flex: 1;
     display: flex;
     flex-direction: column;
-    height: calc(100dvh - 48px);
+    height: calc(100dvh - 48px - env(safe-area-inset-top, 0px));
+    padding-bottom: env(safe-area-inset-bottom, 0px);
     overflow: hidden;
   }
 
