@@ -64,9 +64,20 @@ export function isCloudSyncEnabled(): boolean {
   return getSupabase() !== null
 }
 
-export async function loadStoreFromCloud(): Promise<Store | null> {
+/**
+ * Result of reading the cloud copy. `unavailable` means sync is off or not configured;
+ * `empty` means the cloud was reached and holds no data yet; `error` means the cloud could not
+ * be read, so its contents are unknown and must not be overwritten.
+ */
+export type CloudLoadResult =
+  | { status: 'unavailable' }
+  | { status: 'empty' }
+  | { status: 'error' }
+  | { status: 'ok'; store: Store }
+
+export async function loadStoreFromCloud(): Promise<CloudLoadResult> {
   const supabase = getSupabase()
-  if (!supabase) return null
+  if (!supabase) return { status: 'unavailable' }
 
   try {
     const { data, error } = await supabase
@@ -77,16 +88,16 @@ export async function loadStoreFromCloud(): Promise<Store | null> {
 
     if (error) {
       console.warn('Supabase fetch store warning/error:', error.message)
-      return null
+      return { status: 'error' }
     }
 
-    if (data && data.data && typeof data.data === 'object') {
-      return data.data as Store
+    if (data && data.data && typeof data.data === 'object' && (data.data as Store).nextId) {
+      return { status: 'ok', store: data.data as Store }
     }
-    return null
+    return { status: 'empty' }
   } catch (err) {
     console.error('Error loading store from cloud:', err)
-    return null
+    return { status: 'error' }
   }
 }
 

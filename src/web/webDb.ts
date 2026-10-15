@@ -51,6 +51,8 @@ export interface Store {
   storylines: Storyline[]
   journalEntries: JournalEntry[]
   universes: Universe[]
+  /** Set once the one-time removal of legacy tutorial seed content has run. */
+  seedCleanupDone?: boolean
 }
 
 export function emptyStore(): Store {
@@ -102,10 +104,14 @@ export function setStore(newStore: Store, shouldPersist = true): void {
 }
 
 let cloudSyncTimeout: any = null
+// False when the cloud copy couldn't be read at startup: its contents are unknown, so uploading
+// this device's store could overwrite newer data. Re-enabled once the cloud is heard from again.
+let cloudUploadsAllowed = true
 
 export function persist(): void {
   saveLocalStore(store)
 
+  if (!cloudUploadsAllowed) return
   if (cloudSyncTimeout) clearTimeout(cloudSyncTimeout)
   cloudSyncTimeout = setTimeout(() => {
     saveStoreToCloud(store).catch((err) => console.warn('Supabase cloud sync failed:', err))
@@ -1190,11 +1196,60 @@ function backfill(raw: any): Store {
   return s
 }
 
+const SEED_CHARACTER_NAMES = new Set(['Nym', 'Wren', 'Dorian Vance'])
+const SEED_UNIVERSE_NAMES = new Set(['The Between', 'Thornwood'])
+
+/**
+ * Removes the old tutorial seed characters (and their chats) from stores that still carry them,
+ * e.g. data restored from an older build. Runs once per store: after that, characters the user
+ * creates with the same names are left alone. Never removes anything else the user made, and
+ * only removes a seed universe or its lorebook when no remaining character belongs to it.
+ * Returns true when the store changed.
+ */
+export function removeLegacySeedContent(s: Store): boolean {
+  if (s.seedCleanupDone) return false
+  s.seedCleanupDone = true
+
+  const seedIds = new Set(s.characters.filter((c) => SEED_CHARACTER_NAMES.has(c.name)).map((c) => c.id))
+  if (seedIds.size > 0) {
+    s.characters = s.characters.filter((c) => !seedIds.has(c.id))
+    const removedChatIds = new Set(s.chats.filter((ch) => seedIds.has(ch.characterId)).map((ch) => ch.id))
+    s.chats = s.chats.filter((ch) => !removedChatIds.has(ch.id))
+    s.messages = s.messages.filter((m) => !removedChatIds.has(m.chatId))
+    s.characterLorebooks = s.characterLorebooks.filter((l) => !seedIds.has(l.characterId))
+    s.characterRelationships = s.characterRelationships.filter(
+      (r) => !seedIds.has(r.characterAId) && !seedIds.has(r.characterBId)
+    )
+  }
+
+  const usedUniverseIds = new Set(s.characters.map((c) => c.universeId).filter((id) => id !== null))
+  const removableUniverseIds = new Set(
+    s.universes.filter((u) => SEED_UNIVERSE_NAMES.has(u.name) && !usedUniverseIds.has(u.id)).map((u) => u.id)
+  )
+  if (removableUniverseIds.size > 0) {
+    s.universes = s.universes.filter((u) => !removableUniverseIds.has(u.id))
+    const removedLorebookIds = new Set(
+      s.lorebooks
+        .filter((l) => l.universeId !== null && removableUniverseIds.has(l.universeId) && l.name.includes('The Between'))
+        .map((l) => l.id)
+    )
+    s.lorebooks = s.lorebooks.filter((l) => !removedLorebookIds.has(l.id))
+    s.loreEntries = s.loreEntries.filter((e) => !removedLorebookIds.has(e.lorebookId))
+  }
+
+  return true
+}
+
 export async function initDb(): Promise<void> {
   // 1. Try loading from Supabase Cloud first
-  const cloudData = await loadStoreFromCloud()
-  if (cloudData && cloudData.nextId) {
-    store = backfill(cloudData)
+  const cloud = await loadStoreFromCloud()
+  cloudUploadsAllowed = cloud.status !== 'error'
+  if (cloud.status === 'error') {
+    console.warn('Could not reach cloud sync; keeping changes on this device until it is reachable.')
+  }
+
+  if (cloud.status === 'ok') {
+    store = backfill(cloud.store)
     saveLocalStore(store)
   } else {
     // 2. Otherwise try local IndexedDB
@@ -1208,35 +1263,14 @@ export async function initDb(): Promise<void> {
     }
   }
 
-  // Remove fake/tutorial seed profiles if present
-  const seedNames = new Set(['Nym', 'Wren', 'Dorian Vance'])
-  const hasTutorial = store.characters.some((c) => seedNames.has(c.name) || c.tags.includes('tutorial'))
-  if (hasTutorial) {
-    const isOnlySeed = store.characters.every((c) => seedNames.has(c.name) || c.tags.includes('tutorial'))
-    if (isOnlySeed) {
-      store = emptyStore()
-    } else {
-      const seedIds = new Set(
-        store.characters
-          .filter((c) => seedNames.has(c.name) || c.tags.includes('tutorial'))
-          .map((c) => c.id)
-      )
-      store.characters = store.characters.filter((c) => !seedIds.has(c.id))
-      const removedChatIds = new Set(
-        store.chats.filter((ch) => seedIds.has(ch.characterId)).map((ch) => ch.id)
-      )
-      store.chats = store.chats.filter((ch) => !removedChatIds.has(ch.id))
-      store.messages = store.messages.filter((m) => !removedChatIds.has(m.chatId))
-      store.universes = store.universes.filter((u) => u.name !== 'The Between' && u.name !== 'Thornwood')
-      store.lorebooks = store.lorebooks.filter((l) => !l.name.includes('The Between'))
-    }
+  if (removeLegacySeedContent(store)) {
     persist()
   }
-
 
   // 4. Subscribe to Realtime updates if Supabase is connected
   subscribeToCloudChanges((remoteStore) => {
     console.log('Received remote store update from Supabase Realtime')
+    cloudUploadsAllowed = true
     store = backfill(remoteStore)
     saveLocalStore(store)
     notifyChange()
